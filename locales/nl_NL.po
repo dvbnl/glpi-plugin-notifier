@@ -1,0 +1,130 @@
+# Notifier plugin — Dutch (nl_NL)
+# Copyright (C) 2024-2026 DVBNL
+# This file is distributed under the same license as the Notifier plugin.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: notifier 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-15 00:00+0000\n"
+"PO-Revision-Date: 2026-04-15 00:00+0000\n"
+"Last-Translator: DVBNL\n"
+"Language-Team: Nederlands\n"
+"Language: nl_NL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Notifier - In-app notifications"
+msgstr "Notifier - In-app notificaties"
+
+msgid "Notifier"
+msgstr "Notifier"
+
+msgid "Notifications"
+msgstr "Notificaties"
+
+msgid "Notification"
+msgid_plural "Notifications"
+msgstr[0] "Notificatie"
+msgstr[1] "Notificaties"
+
+msgid "Mark all as read"
+msgstr "Alles markeren als gelezen"
+
+msgid "Mark as read"
+msgstr "Markeren als gelezen"
+
+msgid "Mark as unread"
+msgstr "Markeren als ongelezen"
+
+msgid "No notifications"
+msgstr "Geen notificaties"
+
+msgid "Minimize"
+msgstr "Minimaliseren"
+
+msgid "Expand notifications"
+msgstr "Notificaties tonen"
+
+msgid "New item concerning you"
+msgstr "Nieuw item dat jou betreft"
+
+msgid "Status changed"
+msgstr "Status gewijzigd"
+
+msgid "Item updated"
+msgstr "Item bijgewerkt"
+
+msgid "New project task concerning you"
+msgstr "Nieuwe projecttaak die jou betreft"
+
+msgid "Project task updated"
+msgstr "Projecttaak bijgewerkt"
+
+msgid "New comment"
+msgstr "Nieuwe reactie"
+
+msgid "New task"
+msgstr "Nieuwe taak"
+
+msgid "Solution proposed"
+msgstr "Oplossing voorgesteld"
+
+msgid "You have been assigned"
+msgstr "Je bent toegewezen"
+
+msgid "Your group has been assigned"
+msgstr "Jouw groep is toegewezen"
+
+msgid "You have been added to a project task"
+msgstr "Je bent toegevoegd aan een projecttaak"
+
+msgid "You're all caught up."
+msgstr "Alles is bijgewerkt."
+
+msgid "All"
+msgstr "Alle"
+
+msgid "Unread"
+msgstr "Ongelezen"
+
+msgid "Settings"
+msgstr "Instellingen"
+
+msgid "Notification preferences"
+msgstr "Notificatievoorkeuren"
+
+msgid "Choose which updates you want to receive. Direct updates are about items assigned to you; group updates are about items assigned to one of your groups."
+msgstr "Kies welke updates je wilt ontvangen. Directe updates gaan over items die aan jou zijn toegewezen; groepupdates gaan over items die aan een van je groepen zijn toegewezen."
+
+msgid "Assigned to me"
+msgstr "Aan mij toegewezen"
+
+msgid "Assigned to my group"
+msgstr "Aan mijn groep toegewezen"
+
+msgid "Tickets"
+msgstr "Tickets"
+
+msgid "Changes"
+msgstr "Wijzigingen"
+
+msgid "Problems"
+msgstr "Problemen"
+
+msgid "Project tasks"
+msgstr "Projecttaken"
+
+msgid "Save"
+msgstr "Opslaan"
+
+msgid "Cancel"
+msgstr "Annuleren"
+
+msgid "Preferences saved"
+msgstr "Voorkeuren opgeslagen"
+
+msgid "Close"
+msgstr "Sluiten"

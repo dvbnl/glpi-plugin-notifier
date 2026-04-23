@@ -1,0 +1,19 @@
+{
+    "name": "dvbnl/glpi-plugin-notifier",
+    "description": "In-app notification bell for GLPI technicians — every action that touches you appears in a dropdown next to your avatar",
+    "type": "glpi-plugin",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "DVBNL"
+        }
+    ],
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "GlpiPlugin\\Notifier\\": "src/"
+        }
+    }
+}

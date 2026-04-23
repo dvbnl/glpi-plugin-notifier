@@ -1,0 +1,130 @@
+# Notifier plugin — English (en_GB)
+# Copyright (C) 2024-2026 DVBNL
+# This file is distributed under the same license as the Notifier plugin.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: notifier 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-15 00:00+0000\n"
+"PO-Revision-Date: 2026-04-15 00:00+0000\n"
+"Last-Translator: DVBNL\n"
+"Language-Team: English\n"
+"Language: en_GB\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Notifier - In-app notifications"
+msgstr "Notifier - In-app notifications"
+
+msgid "Notifier"
+msgstr "Notifier"
+
+msgid "Notifications"
+msgstr "Notifications"
+
+msgid "Notification"
+msgid_plural "Notifications"
+msgstr[0] "Notification"
+msgstr[1] "Notifications"
+
+msgid "Mark all as read"
+msgstr "Mark all as read"
+
+msgid "Mark as read"
+msgstr "Mark as read"
+
+msgid "Mark as unread"
+msgstr "Mark as unread"
+
+msgid "No notifications"
+msgstr "No notifications"
+
+msgid "Minimize"
+msgstr "Minimize"
+
+msgid "Expand notifications"
+msgstr "Expand notifications"
+
+msgid "New item concerning you"
+msgstr "New item concerning you"
+
+msgid "Status changed"
+msgstr "Status changed"
+
+msgid "Item updated"
+msgstr "Item updated"
+
+msgid "New project task concerning you"
+msgstr "New project task concerning you"
+
+msgid "Project task updated"
+msgstr "Project task updated"
+
+msgid "New comment"
+msgstr "New comment"
+
+msgid "New task"
+msgstr "New task"
+
+msgid "Solution proposed"
+msgstr "Solution proposed"
+
+msgid "You have been assigned"
+msgstr "You have been assigned"
+
+msgid "Your group has been assigned"
+msgstr "Your group has been assigned"
+
+msgid "You have been added to a project task"
+msgstr "You have been added to a project task"
+
+msgid "You're all caught up."
+msgstr "You're all caught up."
+
+msgid "All"
+msgstr "All"
+
+msgid "Unread"
+msgstr "Unread"
+
+msgid "Settings"
+msgstr "Settings"
+
+msgid "Notification preferences"
+msgstr "Notification preferences"
+
+msgid "Choose which updates you want to receive. Direct updates are about items assigned to you; group updates are about items assigned to one of your groups."
+msgstr "Choose which updates you want to receive. Direct updates are about items assigned to you; group updates are about items assigned to one of your groups."
+
+msgid "Assigned to me"
+msgstr "Assigned to me"
+
+msgid "Assigned to my group"
+msgstr "Assigned to my group"
+
+msgid "Tickets"
+msgstr "Tickets"
+
+msgid "Changes"
+msgstr "Changes"
+
+msgid "Problems"
+msgstr "Problems"
+
+msgid "Project tasks"
+msgstr "Project tasks"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Preferences saved"
+msgstr "Preferences saved"
+
+msgid "Close"
+msgstr "Close"

@@ -1,0 +1,130 @@
+# Notifier plugin — French (fr_FR)
+# Copyright (C) 2024-2026 DVBNL
+# This file is distributed under the same license as the Notifier plugin.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: notifier 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-15 00:00+0000\n"
+"PO-Revision-Date: 2026-04-15 00:00+0000\n"
+"Last-Translator: DVBNL\n"
+"Language-Team: Français\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Notifier - In-app notifications"
+msgstr "Notifier - Notifications in-app"
+
+msgid "Notifier"
+msgstr "Notifier"
+
+msgid "Notifications"
+msgstr "Notifications"
+
+msgid "Notification"
+msgid_plural "Notifications"
+msgstr[0] "Notification"
+msgstr[1] "Notifications"
+
+msgid "Mark all as read"
+msgstr "Tout marquer comme lu"
+
+msgid "Mark as read"
+msgstr "Marquer comme lu"
+
+msgid "Mark as unread"
+msgstr "Marquer comme non lu"
+
+msgid "No notifications"
+msgstr "Aucune notification"
+
+msgid "Minimize"
+msgstr "Réduire"
+
+msgid "Expand notifications"
+msgstr "Afficher les notifications"
+
+msgid "New item concerning you"
+msgstr "Nouvel élément vous concernant"
+
+msgid "Status changed"
+msgstr "Statut modifié"
+
+msgid "Item updated"
+msgstr "Élément mis à jour"
+
+msgid "New project task concerning you"
+msgstr "Nouvelle tâche de projet vous concernant"
+
+msgid "Project task updated"
+msgstr "Tâche de projet mise à jour"
+
+msgid "New comment"
+msgstr "Nouveau commentaire"
+
+msgid "New task"
+msgstr "Nouvelle tâche"
+
+msgid "Solution proposed"
+msgstr "Solution proposée"
+
+msgid "You have been assigned"
+msgstr "Vous avez été attribué"
+
+msgid "Your group has been assigned"
+msgstr "Votre groupe a été attribué"
+
+msgid "You have been added to a project task"
+msgstr "Vous avez été ajouté à une tâche de projet"
+
+msgid "You're all caught up."
+msgstr "Vous êtes à jour."
+
+msgid "All"
+msgstr "Toutes"
+
+msgid "Unread"
+msgstr "Non lues"
+
+msgid "Settings"
+msgstr "Paramètres"
+
+msgid "Notification preferences"
+msgstr "Préférences de notification"
+
+msgid "Choose which updates you want to receive. Direct updates are about items assigned to you; group updates are about items assigned to one of your groups."
+msgstr "Choisissez les mises à jour que vous souhaitez recevoir. Les mises à jour directes concernent les éléments qui vous sont attribués ; les mises à jour de groupe concernent les éléments attribués à l'un de vos groupes."
+
+msgid "Assigned to me"
+msgstr "Attribué à moi"
+
+msgid "Assigned to my group"
+msgstr "Attribué à mon groupe"
+
+msgid "Tickets"
+msgstr "Tickets"
+
+msgid "Changes"
+msgstr "Changements"
+
+msgid "Problems"
+msgstr "Problèmes"
+
+msgid "Project tasks"
+msgstr "Tâches de projet"
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Preferences saved"
+msgstr "Préférences enregistrées"
+
+msgid "Close"
+msgstr "Fermer"

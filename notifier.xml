@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <name>Notifier - In-app notifications</name>
+    <key>notifier</key>
+    <state>stable</state>
+    <description>
+        <short>
+            <en><![CDATA[In-app notification bell for GLPI technicians — every action that touches you (ticket, change, problem, project task) appears in a bell dropdown next to your avatar]]></en>
+            <nl><![CDATA[In-app notificatiebel voor GLPI technici — elke actie die jou raakt (ticket, wijziging, probleem, projecttaak) verschijnt in een dropdown naast je avatar]]></nl>
+            <fr><![CDATA[Cloche de notifications in-app pour les techniciens GLPI — chaque action qui vous concerne (ticket, changement, probleme, tache de projet) apparait dans un menu deroulant a cote de votre avatar]]></fr>
+            <es><![CDATA[Campana de notificaciones in-app para tecnicos GLPI — cada accion que te afecta (ticket, cambio, problema, tarea de proyecto) aparece en un menu desplegable junto a tu avatar]]></es>
+        </short>
+        <long>
+            <en><![CDATA[Notifier adds a real-time notification bell to GLPI's top header, right next to the user avatar.
+
+Features:
+- Central header bell with unread badge and dropdown panel
+- Fires on every action that affects you as a technician:
+  - Ticket / Change / Problem created, assigned, commented, status changed, solution proposed
+  - New ITIL task or followup on an item where you are actor
+  - Project task created, updated, or team-assigned
+  - Group assignments fan out to every member
+- One-click redirect to the source item and automatic mark-as-read
+- "Mark all as read" action in the dropdown header
+- Automatic cleanup: notifications pointing at purged items are deleted
+- 30 second polling, dedup window to prevent bell spam
+- Central interface only — self-service is not touched
+- Full GLPI rights integration (READ / UPDATE / PURGE per profile)
+- Multi-language support: English, Dutch, French, Spanish]]></en>
+        </long>
+    </description>
+    <homepage>https://github.com/dvbnl/glpi-plugin-notifier</homepage>
+    <download>https://github.com/dvbnl/glpi-plugin-notifier/releases</download>
+    <issues>https://github.com/dvbnl/glpi-plugin-notifier/issues</issues>
+    <readme>https://raw.githubusercontent.com/dvbnl/glpi-plugin-notifier/main/README.md</readme>
+    <authors>
+        <author>DVBNL</author>
+    </authors>
+    <versions>
+        <version>
+            <num>1.0.0</num>
+            <compatibility>~10.0</compatibility>
+            <download_url>https://github.com/dvbnl/glpi-plugin-notifier/releases/download/v1.0.0/notifier-v1.0.0.zip</download_url>
+        </version>
+    </versions>
+    <langs>
+        <lang>en_GB</lang>
+        <lang>nl_NL</lang>
+        <lang>fr_FR</lang>
+        <lang>es_ES</lang>
+    </langs>
+    <license><![CDATA[GPL v3+]]></license>
+    <tags>
+        <en>
+            <tag>notifications</tag>
+            <tag>bell</tag>
+            <tag>alerts</tag>
+            <tag>technician</tag>
+            <tag>realtime</tag>
+            <tag>helpdesk</tag>
+        </en>
+    </tags>
+</root>

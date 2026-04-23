@@ -1,0 +1,825 @@
+/**
+ * Notifier plugin — bell widget styles.
+ *
+ * All colors go through CSS custom properties with sensible fallbacks, so
+ * the widget automatically inherits GLPI/Tabler theme colors when they're
+ * available. The plugin defines `--notifier-*` vars scoped to the wrap
+ * (and to modals) and resolves them to Tabler theme vars first
+ * (`--tblr-primary`, `--tblr-danger`, etc.) and hardcoded fallbacks only
+ * when the theme does not expose them.
+ *
+ * Scoped under .notifier-bell-wrap / .notifier-modal-overlay so nothing
+ * leaks into the rest of GLPI.
+ */
+
+.notifier-bell-wrap,
+.notifier-modal-overlay {
+    /* Theme hooks — all color decisions funnel through these. */
+    --notifier-primary:       var(--tblr-primary, var(--bs-primary, var(--primary, #0d6efd)));
+    --notifier-primary-rgb:   var(--tblr-primary-rgb, var(--bs-primary-rgb, 13, 110, 253));
+    /* Derive the "pressed" shade from whatever --notifier-primary resolves
+       to — avoids a dangling --tblr-primary-darker fallback that always
+       lands on hardcoded blue regardless of theme. */
+    --notifier-primary-dark:  color-mix(in srgb, var(--notifier-primary), #000 14%);
+    --notifier-danger:        var(--tblr-danger, #dc3545);
+    --notifier-success:       var(--tblr-success, #198754);
+    --notifier-warning:       var(--tblr-warning, #fd7e14);
+    --notifier-info:          var(--tblr-info, #0dcaf0);
+    --notifier-purple:        var(--tblr-purple, #6f42c1);
+    --notifier-teal:          var(--tblr-teal, #20c997);
+    --notifier-surface:       var(--tblr-bg-surface, #fff);
+    --notifier-surface-alt:   var(--tblr-bg-surface-secondary, #f8f9fa);
+    --notifier-border:        var(--tblr-border-color, rgba(0, 0, 0, .1));
+    --notifier-text:          var(--tblr-body-color, #212529);
+    --notifier-text-muted:    var(--tblr-secondary-color, #6c757d);
+    --notifier-row-hover:     var(--tblr-bg-surface-tertiary, #f1f3f5);
+}
+
+.notifier-bell-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Floating mount: the bell lives fixed in the bottom-right of the
+   viewport, chat-widget style. Independent of any GLPI header markup,
+   never overlaps page content, works identically on desktop and
+   mobile. */
+.notifier-bell-wrap.notifier-bell-floating {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    top: auto;
+    left: auto;
+    z-index: 10050;
+    margin-right: 0;
+}
+
+.notifier-bell-wrap.notifier-bell-floating .notifier-bell-btn {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--notifier-primary);
+    border: 0;
+    border-radius: 50%;
+    box-shadow: 0 8px 22px rgba(var(--notifier-primary-rgb), .4);
+    color: #fff;
+    font-size: 22px;
+    transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+.notifier-bell-wrap.notifier-bell-floating .notifier-bell-btn:hover,
+.notifier-bell-wrap.notifier-bell-floating .notifier-bell-btn:focus-visible {
+    background: var(--notifier-primary-dark);
+    box-shadow: 0 10px 26px rgba(var(--notifier-primary-rgb), .5);
+    outline: 0;
+    transform: translateY(-1px);
+}
+
+.notifier-bell-wrap.notifier-bell-floating .notifier-bell-badge {
+    top: 0;
+    right: 0;
+    min-width: 22px;
+    height: 22px;
+    line-height: 22px;
+    font-size: 11px;
+    box-shadow: 0 0 0 2px var(--notifier-surface);
+}
+
+/* Collapsed state: the bell slides to the right so only a narrow strip
+   sticks out from the viewport edge. The restore tab shows a chevron so
+   users can click it back in. Panel is forcibly hidden. */
+.notifier-bell-wrap.notifier-bell-floating.is-collapsed {
+    right: -36px;
+    transition: right .2s ease;
+}
+
+.notifier-bell-wrap.notifier-bell-floating.is-collapsed:hover {
+    right: -20px;
+}
+
+.notifier-bell-wrap.notifier-bell-floating:not(.is-collapsed) {
+    transition: right .2s ease;
+}
+
+.notifier-bell-wrap.notifier-bell-floating.is-collapsed .notifier-bell-panel {
+    display: none !important;
+}
+
+/* Restore "pull tab": a small chevron that floats just above the
+   collapsed bell so the user sees an affordance to bring it back. */
+.notifier-bell-restore {
+    position: absolute;
+    top: -10px;
+    left: -14px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--notifier-primary);
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(var(--notifier-primary-rgb), .4);
+    z-index: 1;
+}
+
+.notifier-bell-wrap.notifier-bell-floating.is-collapsed .notifier-bell-restore {
+    display: inline-flex;
+}
+
+/* Panel opens UPWARDS from the floating button, anchored to its right
+   edge so it never spills off-screen on narrow viewports. */
+.notifier-bell-wrap.notifier-bell-floating .notifier-bell-panel {
+    top: auto;
+    bottom: calc(100% + 12px);
+    right: 0;
+    left: auto;
+    transform-origin: bottom right;
+}
+
+/* Mobile: panel fills most of the screen, button stays visible. */
+@media (max-width: 600px) {
+    .notifier-bell-wrap.notifier-bell-floating {
+        bottom: 14px;
+        right: 14px;
+    }
+    .notifier-bell-wrap.notifier-bell-floating .notifier-bell-panel {
+        width: calc(100vw - 28px);
+        max-width: 460px;
+        max-height: 75vh;
+        right: 0;
+    }
+}
+
+.notifier-bell-btn {
+    background: transparent;
+    border: 0;
+    padding: 6px 10px;
+    cursor: pointer;
+    color: inherit;
+    font-size: 18px;
+    line-height: 1;
+    border-radius: 8px;
+    transition: background-color .15s ease;
+    position: relative;
+}
+
+.notifier-bell-btn:hover,
+.notifier-bell-btn:focus-visible {
+    background-color: rgba(0, 0, 0, .08);
+    outline: 0;
+}
+
+.notifier-bell-wrap.has-unread .notifier-bell-btn {
+    animation: notifier-pulse 2s ease-in-out 1;
+}
+
+@keyframes notifier-pulse {
+    0%, 100% { transform: rotate(0); }
+    10%, 30% { transform: rotate(-12deg); }
+    20%, 40% { transform: rotate( 12deg); }
+    50%      { transform: rotate(0); }
+}
+
+.notifier-bell-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 10px;
+    background: var(--notifier-danger);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--notifier-surface);
+    pointer-events: none;
+}
+
+/* Panel — the bigger, splashier dropdown. */
+.notifier-bell-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 440px;
+    max-height: 620px;
+    background: var(--notifier-surface);
+    border: 1px solid var(--notifier-border);
+    border-radius: 14px;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .22);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: notifier-pop-in .15s ease-out;
+}
+
+@keyframes notifier-pop-in {
+    from { opacity: 0; transform: translateY(6px) scale(.98); }
+    to   { opacity: 1; transform: none; }
+}
+
+.notifier-bell-panel[hidden] {
+    display: none;
+}
+
+.notifier-bell-panel-header {
+    background: var(--notifier-surface);
+    border-bottom: 1px solid var(--notifier-border);
+}
+
+.notifier-bell-panel-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px 10px;
+}
+
+.notifier-bell-panel-title {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--notifier-text);
+}
+
+.notifier-bell-panel-count {
+    color: var(--notifier-text-muted);
+    font-weight: 500;
+    font-size: 14px;
+    margin-left: 2px;
+}
+
+/* Tabs row — All / Unread / Mark all. Inspired by modern tabbed panels:
+   an underline marks the active tab so switching feels physical. */
+.notifier-bell-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--notifier-border);
+    min-height: 40px;
+}
+
+.notifier-bell-tab {
+    background: transparent;
+    border: 0;
+    padding: 10px 4px;
+    margin-right: 16px;
+    color: var(--notifier-text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    cursor: pointer;
+    position: relative;
+    transition: color .12s ease;
+}
+
+.notifier-bell-tab:hover {
+    color: var(--notifier-text);
+}
+
+.notifier-bell-tab.is-active {
+    color: var(--notifier-primary);
+}
+
+.notifier-bell-tab.is-active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--notifier-primary);
+    border-radius: 2px 2px 0 0;
+}
+
+.notifier-bell-markall {
+    margin-left: auto;
+    background: transparent;
+    border: 0;
+    color: var(--notifier-primary);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.notifier-bell-markall:hover {
+    background: rgba(var(--notifier-primary-rgb), .08);
+}
+
+.notifier-bell-minimize {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--notifier-text-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.notifier-bell-minimize:hover {
+    background: rgba(0, 0, 0, .08);
+    color: var(--notifier-text);
+}
+
+.notifier-bell-panel-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--notifier-surface-alt);
+}
+
+.notifier-bell-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.notifier-bell-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--notifier-border);
+    cursor: pointer;
+    transition: background-color .12s ease;
+    background: var(--notifier-surface);
+}
+
+.notifier-bell-item:last-child {
+    border-bottom: 0;
+}
+
+.notifier-bell-item:hover {
+    background: var(--notifier-row-hover);
+}
+
+.notifier-bell-item.is-unread {
+    background: var(--notifier-surface);
+    border-left: 3px solid var(--notifier-primary);
+    padding-left: 13px;
+}
+
+.notifier-bell-item.is-unread:hover {
+    background: rgba(var(--notifier-primary-rgb), .06);
+}
+
+.notifier-bell-item-icon {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--notifier-surface-alt);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--notifier-text-muted);
+    font-size: 15px;
+}
+
+.notifier-bell-item.is-unread .notifier-bell-item-icon {
+    background: var(--notifier-primary);
+    color: #fff;
+}
+
+.notifier-bell-item.notifier-event-assigned       .notifier-bell-item-icon { background: var(--notifier-success); color: #fff; }
+.notifier-bell-item.notifier-event-commented      .notifier-bell-item-icon { background: var(--notifier-purple);  color: #fff; }
+.notifier-bell-item.notifier-event-status_changed .notifier-bell-item-icon { background: var(--notifier-warning); color: #fff; }
+.notifier-bell-item.notifier-event-solution       .notifier-bell-item-icon { background: var(--notifier-teal);    color: #fff; }
+.notifier-bell-item.notifier-event-task_added     .notifier-bell-item-icon { background: var(--notifier-info);    color: #000; }
+
+.notifier-bell-item-body {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.notifier-bell-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--notifier-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notifier-bell-item-msg {
+    font-size: 12px;
+    color: var(--notifier-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notifier-bell-item-meta {
+    font-size: 11px;
+    color: var(--notifier-text-muted);
+    opacity: .85;
+    margin-top: 3px;
+}
+
+/* Per-item toggle button: mark read (check) on unread rows,
+   mark unread (undo) on read rows. */
+.notifier-bell-item-toggle {
+    flex: 0 0 auto;
+    align-self: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    margin-left: 6px;
+    border: 1px solid rgba(var(--notifier-primary-rgb), .3);
+    border-radius: 50%;
+    background: var(--notifier-surface);
+    color: var(--notifier-primary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: background .12s ease, color .12s ease, border-color .12s ease;
+}
+
+.notifier-bell-item-toggle:hover,
+.notifier-bell-item-toggle:focus-visible {
+    background: var(--notifier-primary);
+    color: #fff;
+    border-color: var(--notifier-primary);
+    outline: 0;
+}
+
+/* Read rows dim their toggle slightly so the primary action for unread
+   rows visually stands out. */
+.notifier-bell-item.is-read .notifier-bell-item-toggle {
+    border-color: var(--notifier-border);
+    color: var(--notifier-text-muted);
+}
+
+.notifier-bell-item.is-read .notifier-bell-item-toggle:hover {
+    border-color: rgba(var(--notifier-primary-rgb), .3);
+    color: var(--notifier-primary);
+    background: var(--notifier-surface);
+}
+
+/* Empty state — illustrative, not just a text line. */
+.notifier-bell-empty {
+    padding: 48px 20px 60px;
+    text-align: center;
+    color: var(--notifier-text-muted);
+    font-size: 13px;
+}
+
+.notifier-bell-empty-art {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,
+        rgba(var(--notifier-primary-rgb), .12),
+        rgba(var(--notifier-primary-rgb), .02));
+    color: var(--notifier-primary);
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notifier-bell-empty-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--notifier-text);
+    margin-bottom: 4px;
+}
+
+.notifier-bell-empty-hint {
+    font-size: 13px;
+    color: var(--notifier-text-muted);
+}
+
+/* Footer — houses the Settings (cog) button. Matches the TopDesk panel
+   layout from the reference screenshots. */
+.notifier-bell-panel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 10px 14px;
+    border-top: 1px solid var(--notifier-border);
+    background: var(--notifier-surface);
+}
+
+.notifier-bell-settings {
+    background: var(--notifier-surface);
+    border: 1px solid var(--notifier-border);
+    border-radius: 8px;
+    color: var(--notifier-text);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 7px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color .12s ease, background .12s ease, color .12s ease;
+}
+
+.notifier-bell-settings i {
+    color: var(--notifier-primary);
+}
+
+.notifier-bell-settings:hover,
+.notifier-bell-settings:focus-visible {
+    border-color: var(--notifier-primary);
+    background: rgba(var(--notifier-primary-rgb), .06);
+    outline: 0;
+}
+
+/* Dark header compatibility: when GLPI renders a dark topbar the inline
+   bell icon inherits color from the parent, so usually "just works".
+   These overrides cover the explicit dark-theme classes. */
+.theme-dark .notifier-bell-btn,
+.is-dark-header .notifier-bell-btn {
+    color: #fff;
+}
+
+.theme-dark .notifier-bell-btn:hover,
+.is-dark-header .notifier-bell-btn:hover {
+    background: rgba(255, 255, 255, .15);
+}
+
+/* =====================================================================
+   Preferences modal
+   ===================================================================== */
+
+.notifier-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, .5);
+    z-index: 11000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: notifier-fade-in .15s ease-out;
+}
+
+.notifier-modal-overlay[hidden] {
+    display: none;
+}
+
+@keyframes notifier-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.notifier-modal {
+    background: var(--notifier-surface);
+    color: var(--notifier-text);
+    border-radius: 14px;
+    box-shadow: 0 22px 60px rgba(0, 0, 0, .35);
+    width: 520px;
+    max-width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: notifier-pop-in .18s ease-out;
+}
+
+.notifier-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--notifier-border);
+}
+
+.notifier-modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--notifier-text);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notifier-modal-title i {
+    color: var(--notifier-primary);
+}
+
+.notifier-modal-close {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    color: var(--notifier-text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notifier-modal-close:hover {
+    background: rgba(0, 0, 0, .08);
+    color: var(--notifier-text);
+}
+
+.notifier-modal-body {
+    padding: 18px 22px 8px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.notifier-modal-intro {
+    margin: 0 0 16px;
+    color: var(--notifier-text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.notifier-pref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.notifier-pref-table thead th {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--notifier-text-muted);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--notifier-border);
+}
+
+.notifier-pref-table thead th:first-child {
+    text-align: left;
+}
+
+.notifier-pref-table tbody th {
+    text-align: left;
+    padding: 14px 10px;
+    font-weight: 600;
+    color: var(--notifier-text);
+    border-bottom: 1px solid var(--notifier-border);
+    width: 50%;
+}
+
+.notifier-pref-table tbody td {
+    text-align: center;
+    padding: 14px 10px;
+    border-bottom: 1px solid var(--notifier-border);
+    vertical-align: middle;
+}
+
+.notifier-pref-table tbody tr:last-child th,
+.notifier-pref-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* Switch control — a pill-shaped toggle, iOS-style. Uses the native
+   checkbox under the hood for accessibility. */
+.notifier-switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.notifier-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.notifier-switch-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--notifier-border);
+    border-radius: 24px;
+    transition: background .15s ease;
+}
+
+.notifier-switch-slider::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    transition: transform .15s ease;
+}
+
+.notifier-switch input:checked + .notifier-switch-slider {
+    background: var(--notifier-primary);
+}
+
+.notifier-switch input:checked + .notifier-switch-slider::before {
+    transform: translateX(18px);
+}
+
+.notifier-switch input:focus-visible + .notifier-switch-slider {
+    box-shadow: 0 0 0 3px rgba(var(--notifier-primary-rgb), .25);
+}
+
+.notifier-modal-toast {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(var(--notifier-primary-rgb), .08);
+    color: var(--notifier-primary);
+    border-radius: 8px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notifier-modal-toast[hidden] {
+    display: none;
+}
+
+.notifier-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 22px;
+    border-top: 1px solid var(--notifier-border);
+    background: var(--notifier-surface-alt);
+}
+
+.notifier-btn {
+    background: transparent;
+    border: 1px solid var(--notifier-border);
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--notifier-text);
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+.notifier-btn:hover {
+    background: var(--notifier-row-hover);
+}
+
+.notifier-btn-primary {
+    background: var(--notifier-primary);
+    border-color: var(--notifier-primary);
+    color: #fff;
+}
+
+.notifier-btn-primary:hover {
+    background: var(--notifier-primary-dark);
+    border-color: var(--notifier-primary-dark);
+    color: #fff;
+}
+
+.notifier-btn-primary:disabled,
+.notifier-btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .notifier-modal {
+        width: 100%;
+    }
+    .notifier-pref-table tbody th {
+        font-size: 13px;
+    }
+}
