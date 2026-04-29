@@ -30,7 +30,7 @@
 
 use Glpi\Plugin\Hooks;
 
-define('PLUGIN_NOTIFIER_VERSION', '1.0.0');
+define('PLUGIN_NOTIFIER_VERSION', '1.0.1');
 define('PLUGIN_NOTIFIER_MIN_GLPI', '10.0.0');
 define('PLUGIN_NOTIFIER_MAX_GLPI', '11.99.99');
 
