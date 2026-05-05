@@ -1,0 +1,135 @@
+# Notifier plugin translation template
+# Copyright (C) 2024-2026 DVBNL
+# This file is distributed under the same license as the Notifier plugin.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: notifier 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-15 00:00+0000\n"
+"PO-Revision-Date: 2026-05-05 11:01+0900\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ja_JP\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.9\n"
+
+msgid "Notifier - In-app notifications"
+msgstr "通知ベル - アプリ内通知"
+
+msgid "Notifier"
+msgstr "通知ベル"
+
+msgid "Notifications"
+msgstr "通知"
+
+msgid "Notification"
+msgid_plural "Notifications"
+msgstr[0] "通知"
+
+msgid "Mark all as read"
+msgstr "すべて既読に"
+
+msgid "Mark as read"
+msgstr "既読に"
+
+msgid "Mark as unread"
+msgstr "未読に"
+
+msgid "No notifications"
+msgstr "通知なし"
+
+msgid "Minimize"
+msgstr "最小化"
+
+msgid "Expand notifications"
+msgstr "通知を展開する"
+
+msgid "New item concerning you"
+msgstr "自分に関わる新アイテム"
+
+msgid "Status changed"
+msgstr "状態の変更"
+
+msgid "Item updated"
+msgstr "アイテムの更新"
+
+msgid "New project task concerning you"
+msgstr "自分に関わる新プロジェクトタスク"
+
+msgid "Project task updated"
+msgstr "プロジェクトタスクの更新"
+
+msgid "New comment"
+msgstr "新しいコメント"
+
+msgid "New task"
+msgstr "新しいタスク"
+
+msgid "Solution proposed"
+msgstr "解決の提案"
+
+msgid "You have been assigned"
+msgstr "あなたが担当に"
+
+msgid "Your group has been assigned"
+msgstr "あなたのグループが担当に"
+
+msgid "You have been added to a project task"
+msgstr "プロジェクトタスクの担当に"
+
+msgid "You're all caught up."
+msgstr "未読はありません。"
+
+msgid "All"
+msgstr "すべて"
+
+msgid "Unread"
+msgstr "未読"
+
+msgid "Settings"
+msgstr "設定"
+
+msgid "Notification preferences"
+msgstr "通知設定"
+
+msgid ""
+"Choose which updates you want to receive. Direct updates are about items "
+"assigned to you; group updates are about items assigned to one of your "
+"groups."
+msgstr ""
+"通知を受けたいものを選んでください。直接更新は自分が担当のアイテムについ"
+"て、グループ更新は自分のグループのだれかが担当のアイテムについてです。"
+
+msgid "Assigned to me"
+msgstr "自分が担当"
+
+msgid "Assigned to my group"
+msgstr "グループが担当"
+
+msgid "Tickets"
+msgstr "チケット"
+
+msgid "Changes"
+msgstr "変更"
+
+msgid "Problems"
+msgstr "問題"
+
+msgid "Project tasks"
+msgstr "プロジェクトタスク"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Cancel"
+msgstr "キャンセル"
+
+msgid "Preferences saved"
+msgstr "設定を保存しました"
+
+msgid "Close"
+msgstr "閉じる"
