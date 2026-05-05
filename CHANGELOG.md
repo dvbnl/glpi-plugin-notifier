@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2026-04-29
+
+### Fixed
+- **GLPI 11 compatibility**: every `ajax/*.php` endpoint now guards its bootstrap include with `defined('GLPI_ROOT')`. GLPI 11 routes legacy plugin endpoints through `LegacyFileLoadController`, which has already booted the kernel and defined `GLPI_ROOT`; re-running `/inc/includes.php` emitted a "constant already defined" warning that ended up in the response body and broke the bell's JSON parsing. GLPI 10 still hits these files directly and is unaffected — the include runs as before
+
 ## [1.0.0] - 2026-04-14
 
 Initial release.

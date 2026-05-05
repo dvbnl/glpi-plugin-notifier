@@ -12,7 +12,9 @@
  * and only mutates rows owned by the logged-in user, so CSRF risk is nil.
  */
 
-include(dirname(__DIR__, 3) . '/inc/includes.php');
+if (!defined('GLPI_ROOT')) {
+    include(dirname(__DIR__, 3) . '/inc/includes.php');
+}
 
 header('Content-Type: application/json');
 

@@ -8,7 +8,9 @@
  * dropdown posts multiple times per page load so it needs a fresh token.
  */
 
-include(dirname(__DIR__, 3) . '/inc/includes.php');
+if (!defined('GLPI_ROOT')) {
+    include(dirname(__DIR__, 3) . '/inc/includes.php');
+}
 
 header('Content-Type: application/json');
 
