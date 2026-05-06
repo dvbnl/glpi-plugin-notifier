@@ -1,32 +1,18 @@
 /**
- * Notifier plugin — bell widget.
- *
- * Responsibilities:
- *   1. Inject a bell button into GLPI's top header next to the user menu.
- *   2. Poll /plugins/notifier/ajax/list.php for unread count + latest items.
- *   3. Render a dropdown panel showing the items, with All/Unread tabs.
- *   4. Wire click-to-open (redirect to the item URL, mark row as read).
- *   5. Wire "mark all as read" action.
- *   6. Expose a settings modal for per-type, per-channel notification
- *      preferences (direct vs. group updates per ITIL type).
- *
- * Runs only in the central interface — setup.php skips the JS hook in
- * helpdesk mode, so no need to guard here.
+ * Notifier plugin — bell widget. Central interface only (setup.php gates
+ * the JS hook off in helpdesk mode, so no runtime guard here).
  */
 (function() {
     'use strict';
 
     var POLL_INTERVAL_MS = 30000;
     var LS_COLLAPSED_KEY = 'notifier:collapsed';
-    var LS_TAB_KEY       = 'notifier:tab';       // 'all' | 'unread'
-    var BASE_URL = null;      // resolved once we find the GLPI root
+    var LS_TAB_KEY       = 'notifier:tab';
+    var BASE_URL = null;
     var pollTimer = null;
     var pollInFlight = false;
 
-    // Pref flag columns kept in one place so the modal and the save-payload
-    // agree on ordering/typing. Each entry is [slug, itemTypeLabel, directKey, groupKey].
-    // itemTypeLabel is a T-key name (not the translated string) — the modal
-    // renderer looks it up in T so the row titles stay i18n-aware.
+    // typeLabelKey points at a T entry so the modal stays i18n-aware.
     var PREF_TYPES = [
         { slug: 'ticket',      typeLabelKey: 'typeTicket',      direct: 'notify_ticket_direct',      group: 'notify_ticket_group' },
         { slug: 'change',      typeLabelKey: 'typeChange',      direct: 'notify_change_direct',      group: 'notify_change_group' },
@@ -34,10 +20,7 @@
         { slug: 'projecttask', typeLabelKey: 'typeProjectTask', direct: 'notify_projecttask_direct', group: 'notify_projecttask_group' }
     ];
 
-    // Translation dictionary, hydrated from ajax/i18n.php at boot. The
-    // English values act as fallbacks until the request resolves (and if
-    // the endpoint ever fails). Every user-facing string flows through
-    // here so the bell respects the GLPI session language.
+    // English fallbacks; ajax/i18n.php hydrates this on boot.
     var T = {
         notifications:       'Notifications',
         markAllRead:         'Mark all as read',
@@ -61,21 +44,23 @@
         save:                'Save',
         cancel:              'Cancel',
         saved:               'Preferences saved',
-        close:               'Close'
+        close:               'Close',
+        groupedUpdates:      '{n} updates',
+        expandGroup:         'Show all updates',
+        collapseGroup:       'Hide updates'
     };
 
-    // Active client-side state. Mutated by render() and the tab handler.
     var state = {
         items: [],
         unread: 0,
-        tab: loadTab()   // 'all' | 'unread'
+        unreadGroups: 0,
+        tab: loadTab(),
+        expanded: new Set()
     };
 
     // ------------------------------------------------------------------ utils
 
     function resolveBaseUrl() {
-        // GLPI exposes its root path via CFG_GLPI.root_doc in a global.
-        // Fall back to location-based detection if the global is missing.
         if (typeof window.CFG_GLPI === 'object' && window.CFG_GLPI && window.CFG_GLPI.root_doc) {
             return window.CFG_GLPI.root_doc + '/plugins/notifier';
         }
@@ -103,8 +88,6 @@
 
     function isSameOrigin(url) {
         try {
-            // Resolve against the current page so relative URLs
-            // ("/front/ticket.form.php?id=1") stay valid.
             var resolved = new URL(url, window.location.href);
             return resolved.origin === window.location.origin;
         } catch (e) {
@@ -113,8 +96,8 @@
     }
 
     function timeAgo(dateStr) {
-        // GLPI stores TIMESTAMP like "2026-04-14 13:37:00" — treat as local.
         if (!dateStr) return '';
+        // GLPI TIMESTAMP "2026-04-14 13:37:00" — treat as local.
         var d = new Date(dateStr.replace(' ', 'T'));
         var diff = (Date.now() - d.getTime()) / 1000;
         if (diff < 60)    return Math.floor(diff) + 's';
@@ -126,8 +109,8 @@
     function loadTab() {
         try {
             var v = localStorage.getItem(LS_TAB_KEY);
-            return v === 'unread' ? 'unread' : 'all';
-        } catch (e) { return 'all'; }
+            return v === 'all' ? 'all' : 'unread';
+        } catch (e) { return 'unread'; }
     }
     function saveTab(tab) {
         try { localStorage.setItem(LS_TAB_KEY, tab); } catch (e) { /* ignore */ }
@@ -143,8 +126,6 @@
             +   '<i class="fas fa-bell"></i>'
             +   '<span class="notifier-bell-badge" hidden>0</span>'
             + '</button>'
-            // Minimize tab: visible only when the wrap has .is-collapsed.
-            // Clicking it uncollapses + opens the panel in one go.
             + '<button type="button" class="notifier-bell-restore" aria-label="' + escapeHtml(T.expand) + '" title="' + escapeHtml(T.expand) + '">'
             +   '<i class="fas fa-chevron-left"></i>'
             + '</button>'
@@ -160,8 +141,8 @@
             +       '</button>'
             +     '</div>'
             +     '<div class="notifier-bell-tabs" role="tablist">'
-            +       '<button type="button" class="notifier-bell-tab" data-tab="all" role="tab" aria-selected="true">' + escapeHtml(T.tabAll) + '</button>'
-            +       '<button type="button" class="notifier-bell-tab" data-tab="unread" role="tab" aria-selected="false">' + escapeHtml(T.tabUnread) + '</button>'
+            +       '<button type="button" class="notifier-bell-tab" data-tab="unread" role="tab" aria-selected="true">' + escapeHtml(T.tabUnread) + '</button>'
+            +       '<button type="button" class="notifier-bell-tab" data-tab="all" role="tab" aria-selected="false">' + escapeHtml(T.tabAll) + '</button>'
             +       '<button type="button" class="notifier-bell-markall">' + escapeHtml(T.markAllRead) + '</button>'
             +     '</div>'
             +   '</div>'
@@ -184,10 +165,6 @@
         return wrap;
     }
 
-    /**
-     * Apply a collapsed/uncollapsed state to the wrap, syncing localStorage
-     * and ARIA state. `wrap` may be null for a no-op (used before mount).
-     */
     function setCollapsed(wrap, collapsed) {
         try { localStorage.setItem(LS_COLLAPSED_KEY, collapsed ? '1' : '0'); } catch (e) { /* ignore */ }
         if (!wrap) return;
@@ -195,7 +172,6 @@
         var btn = wrap.querySelector('.notifier-bell-btn');
         if (btn) btn.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
         if (collapsed) {
-            // Always close the panel when we minimize.
             var panel = wrap.querySelector('.notifier-bell-panel');
             if (panel) panel.hidden = true;
             if (btn) btn.setAttribute('aria-expanded', 'false');
@@ -207,12 +183,10 @@
     }
 
     function installBell() {
-        if (document.querySelector('.notifier-bell-wrap')) return true;  // already mounted
-        // GLPI's header DOM varies wildly across versions and themes, and
-        // every selector-based mount we tried had edge cases (bell inside
-        // a collapsed dropdown, inside a zero-width btn-group, etc).
-        // Just float the bell fixed top-right — it's independent of any
-        // GLPI markup and always visible.
+        if (document.querySelector('.notifier-bell-wrap')) return true;
+        // Floating mount: GLPI's header DOM varies by version/theme and
+        // every selector-based mount we tried had edge cases. Fixed
+        // bottom-right is theme-independent and always visible.
         var bell = buildBell();
         bell.classList.add('notifier-bell-floating');
         document.body.appendChild(bell);
@@ -229,13 +203,56 @@
         return state.items;
     }
 
+    function groupKey(item) {
+        return item.itemtype + ':' + item.items_id;
+    }
+
+    function groupItems(items) {
+        var byKey = Object.create(null);
+        var order = [];
+        items.forEach(function(item) {
+            var key = groupKey(item);
+            if (!byKey[key]) {
+                byKey[key] = {
+                    key:      key,
+                    itemtype: item.itemtype,
+                    items_id: item.items_id,
+                    title:    item.title,
+                    url:      item.url,
+                    events:   []
+                };
+                order.push(key);
+            }
+            byKey[key].events.push(item);
+        });
+        return order.map(function(k) { return byKey[k]; });
+    }
+
+    // Group-level actions need every matching event, not just the
+    // tab-filtered ones — so they cover read events on the Unread tab too.
+    function eventsForKey(key) {
+        var sep = key.indexOf(':');
+        if (sep < 0) return [];
+        var itemtype = key.substring(0, sep);
+        var itemsId  = parseInt(key.substring(sep + 1), 10);
+        return state.items.filter(function(ev) {
+            return ev.itemtype === itemtype && ev.items_id === itemsId;
+        });
+    }
+
+    function formatGroupedUpdates(n) {
+        return (T.groupedUpdates || '{n} updates').replace('{n}', n);
+    }
+
     function render() {
         var wrap = document.querySelector('.notifier-bell-wrap');
         if (!wrap) return;
 
+        var displayCount = state.unreadGroups;
+
         var badge = wrap.querySelector('.notifier-bell-badge');
-        if (state.unread > 0) {
-            badge.textContent = state.unread > 99 ? '99+' : String(state.unread);
+        if (displayCount > 0) {
+            badge.textContent = displayCount > 99 ? '99+' : String(displayCount);
             badge.hidden = false;
             wrap.classList.add('has-unread');
         } else {
@@ -243,13 +260,9 @@
             wrap.classList.remove('has-unread');
         }
 
-        // Title counter in the panel header mirrors the unread count so the
-        // dropdown looks "alive" even when the bell badge is eclipsed by an
-        // open panel (e.g. the user just clicked it open).
         var countEl = wrap.querySelector('.notifier-bell-panel-count');
-        if (countEl) countEl.textContent = '(' + state.unread + ')';
+        if (countEl) countEl.textContent = '(' + displayCount + ')';
 
-        // Sync tab button active state.
         var tabBtns = wrap.querySelectorAll('.notifier-bell-tab');
         tabBtns.forEach(function(btn) {
             var isActive = btn.dataset.tab === state.tab;
@@ -268,42 +281,112 @@
         }
         empty.hidden = true;
 
-        items.forEach(function(item) {
-            var li = document.createElement('li');
-            li.className = 'notifier-bell-item notifier-event-' + escapeHtml(item.event)
-                + (item.is_read ? ' is-read' : ' is-unread');
-            li.dataset.id = item.id;
-            li.dataset.url = item.url;
-            // Toggle button: a check on unread rows (click = mark read), or
-            // an undo arrow on read rows (click = mark unread again). Data
-            // attribute drives which endpoint the click handler calls.
-            var toggleAction = item.is_read ? 'unread' : 'read';
-            var toggleIcon   = item.is_read ? 'fa-rotate-left' : 'fa-check';
-            var toggleLabel  = item.is_read ? T.markAsUnread : T.markAsRead;
-            var toggleHtml = '<button type="button" class="notifier-bell-item-toggle"'
-                + ' data-action="' + toggleAction + '"'
-                + ' title="' + toggleLabel + '" aria-label="' + toggleLabel + '">'
-                + '<i class="fas ' + toggleIcon + '"></i>'
-                + '</button>';
-            li.innerHTML = ''
-                + '<div class="notifier-bell-item-icon"><i class="fas ' + eventIcon(item.event) + '"></i></div>'
-                + '<div class="notifier-bell-item-body">'
-                +   '<div class="notifier-bell-item-title">' + escapeHtml(item.title) + '</div>'
-                +   '<div class="notifier-bell-item-msg">'
-                +     (item.actor_name ? '<strong>' + escapeHtml(item.actor_name) + '</strong> ' : '')
-                +     escapeHtml(item.message)
-                +   '</div>'
-                +   '<div class="notifier-bell-item-meta">' + escapeHtml(timeAgo(item.date_creation)) + '</div>'
-                + '</div>'
-                + toggleHtml;
-            list.appendChild(li);
+        var groups = groupItems(items);
+        groups.forEach(function(group) {
+            list.appendChild(buildGroupNode(group));
         });
     }
 
-    /**
-     * Map an event slug to a distinctive Font Awesome icon. Falls back to
-     * fa-bell so an unknown event still renders something legible.
-     */
+    function buildGroupNode(group) {
+        var unreadEvents = group.events.filter(function(e) { return !e.is_read; });
+        var groupUnread  = unreadEvents.length > 0;
+        var primary      = group.events[0];
+        var batched      = group.events.length > 1;
+        var isExpanded   = batched && state.expanded.has(group.key);
+
+        var li = document.createElement('li');
+        li.className = 'notifier-bell-group notifier-event-' + escapeHtml(primary.event)
+            + (groupUnread ? ' is-unread' : ' is-read')
+            + (batched     ? ' is-batched' : '')
+            + (isExpanded  ? ' is-expanded' : '');
+        li.dataset.key = group.key;
+        li.dataset.url = group.url;
+
+        var toggleAction = groupUnread ? 'group-read' : 'group-unread';
+        var toggleIcon   = groupUnread ? 'fa-check'   : 'fa-rotate-left';
+        var toggleLabel  = groupUnread ? T.markAsRead : T.markAsUnread;
+        var toggleHtml = '<button type="button" class="notifier-bell-item-toggle"'
+            + ' data-action="' + toggleAction + '"'
+            + ' title="' + toggleLabel + '" aria-label="' + toggleLabel + '">'
+            + '<i class="fas ' + toggleIcon + '"></i>'
+            + '</button>';
+
+        var expandHtml = '';
+        var metaExtra  = '';
+        if (batched) {
+            var label = isExpanded ? T.collapseGroup : T.expandGroup;
+            expandHtml = '<button type="button" class="notifier-bell-group-expand"'
+                + ' data-action="expand"'
+                + ' aria-expanded="' + (isExpanded ? 'true' : 'false') + '"'
+                + ' title="' + escapeHtml(label) + '" aria-label="' + escapeHtml(label) + '">'
+                + '<i class="fas fa-chevron-down"></i>'
+                + '</button>';
+            metaExtra = ' <span class="notifier-bell-group-meta-count">· '
+                + escapeHtml(formatGroupedUpdates(group.events.length))
+                + '</span>';
+        }
+
+        var header = document.createElement('div');
+        header.className = 'notifier-bell-item notifier-bell-group-header'
+            + (groupUnread ? ' is-unread' : ' is-read');
+        header.innerHTML = ''
+            + '<div class="notifier-bell-item-icon"><i class="fas ' + eventIcon(primary.event) + '"></i></div>'
+            + '<div class="notifier-bell-item-body">'
+            +   '<div class="notifier-bell-item-title">' + escapeHtml(group.title) + '</div>'
+            +   '<div class="notifier-bell-item-msg">'
+            +     (primary.actor_name ? '<strong>' + escapeHtml(primary.actor_name) + '</strong> ' : '')
+            +     escapeHtml(primary.message)
+            +   '</div>'
+            +   '<div class="notifier-bell-item-meta">'
+            +     escapeHtml(timeAgo(primary.date_creation))
+            +     metaExtra
+            +   '</div>'
+            + '</div>'
+            + expandHtml
+            + toggleHtml;
+        li.appendChild(header);
+
+        if (isExpanded) {
+            var ul = document.createElement('ul');
+            ul.className = 'notifier-bell-subs';
+            group.events.forEach(function(ev) {
+                ul.appendChild(buildSubNode(ev));
+            });
+            li.appendChild(ul);
+        }
+
+        return li;
+    }
+
+    function buildSubNode(item) {
+        var li = document.createElement('li');
+        li.className = 'notifier-bell-sub-item notifier-event-' + escapeHtml(item.event)
+            + (item.is_read ? ' is-read' : ' is-unread');
+        li.dataset.id = item.id;
+        li.dataset.url = item.url;
+
+        var toggleAction = item.is_read ? 'unread' : 'read';
+        var toggleIcon   = item.is_read ? 'fa-rotate-left' : 'fa-check';
+        var toggleLabel  = item.is_read ? T.markAsUnread : T.markAsRead;
+        var toggleHtml = '<button type="button" class="notifier-bell-item-toggle"'
+            + ' data-action="' + toggleAction + '"'
+            + ' title="' + toggleLabel + '" aria-label="' + toggleLabel + '">'
+            + '<i class="fas ' + toggleIcon + '"></i>'
+            + '</button>';
+
+        li.innerHTML = ''
+            + '<div class="notifier-bell-sub-icon"><i class="fas ' + eventIcon(item.event) + '"></i></div>'
+            + '<div class="notifier-bell-sub-body">'
+            +   '<div class="notifier-bell-sub-msg">'
+            +     (item.actor_name ? '<strong>' + escapeHtml(item.actor_name) + '</strong> ' : '')
+            +     escapeHtml(item.message)
+            +   '</div>'
+            +   '<div class="notifier-bell-item-meta">' + escapeHtml(timeAgo(item.date_creation)) + '</div>'
+            + '</div>'
+            + toggleHtml;
+        return li;
+    }
+
     function eventIcon(event) {
         switch (event) {
             case 'assigned':       return 'fa-user-check';
@@ -317,11 +400,8 @@
         }
     }
 
-    /**
-     * Fire a mark-read request. GET avoids GLPI 11's Symfony CheckCsrfListener
-     * which only runs on POST routes; the endpoint is still login + rights
-     * protected and only mutates rows owned by the session user.
-     */
+    // GET, not POST: GLPI 11's Symfony CheckCsrfListener only runs on POST
+    // routes. Endpoint is still session + ownership protected.
     function fireMarkRead(id) {
         return fetchJson(BASE_URL + '/ajax/markread.php?id=' + encodeURIComponent(id))
             .catch(function(err) {
@@ -329,9 +409,6 @@
             });
     }
 
-    /**
-     * Fire a mark-unread request (undoes markRead).
-     */
     function fireMarkUnread(id) {
         return fetchJson(BASE_URL + '/ajax/markunread.php?id=' + encodeURIComponent(id))
             .catch(function(err) {
@@ -341,12 +418,6 @@
 
     // ---------------------------------------------------------------- preferences modal
 
-    /**
-     * Render the preferences modal. The modal is injected lazily the first
-     * time the settings button is clicked and reused afterwards — cheaper
-     * than rebuilding on every open, and lets us reuse the same DOM for
-     * state restoration on cancel.
-     */
     function buildPreferencesModal() {
         var overlay = document.createElement('div');
         overlay.className = 'notifier-modal-overlay';
@@ -417,8 +488,6 @@
     function wirePreferencesModal(overlay) {
         var modal = overlay.querySelector('.notifier-modal');
 
-        // Clicking the backdrop closes without saving; clicks inside the
-        // modal body should not propagate up and trigger that close.
         overlay.addEventListener('click', function(e) {
             if (e.target === overlay) {
                 closePreferences(overlay);
@@ -446,8 +515,6 @@
     function openPreferences() {
         var overlay = ensurePreferencesModal();
         overlay.hidden = false;
-        // Pull the fresh preferences on every open so the modal reflects
-        // any concurrent change (e.g. the user saved in another tab).
         fetchJson(BASE_URL + '/ajax/preferences.php')
             .then(function(resp) {
                 var prefs = (resp && resp.preferences) || {};
@@ -456,7 +523,7 @@
                     input.checked = !!(prefs[key] === undefined ? 1 : +prefs[key]);
                 });
             })
-            .catch(function() { /* keep defaults checked */ });
+            .catch(function() { /* keep defaults */ });
     }
 
     function closePreferences(overlay) {
@@ -474,10 +541,7 @@
         var saveBtn = overlay.querySelector('[data-action="save"]');
         saveBtn.disabled = true;
 
-        // Mint a fresh CSRF token right before the save — the preferences
-        // endpoint rejects the call without it. Staying on GET (for the
-        // same Symfony-listener reason as mark*.php) is still safe because
-        // an attacker on another origin cannot read this token response.
+        // Mint a fresh token: preferences.php rejects without it.
         fetchJson(BASE_URL + '/ajax/csrftoken.php')
             .then(function(r) {
                 params.append('_glpi_csrf_token', r && r.token ? r.token : '');
@@ -511,9 +575,6 @@
 
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
-            // If the user clicks the bell while collapsed, treat it as
-            // "restore + open" — single click to go from minimized to seeing
-            // their notifications.
             if (wrap.classList.contains('is-collapsed')) {
                 setCollapsed(wrap, false);
                 panel.hidden = false;
@@ -524,13 +585,9 @@
             var open = !panel.hidden;
             panel.hidden = open;
             btn.setAttribute('aria-expanded', String(!open));
-            if (!open) {
-                refresh();  // fetch fresh data every time the panel opens
-            }
+            if (!open) refresh();
         });
 
-        // Restore (uncollapse) tab: slides the bell back on-screen and
-        // opens the panel in the same click.
         if (restore) {
             restore.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -541,7 +598,6 @@
             });
         }
 
-        // Minimize button inside the panel header.
         if (minimize) {
             minimize.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -550,7 +606,6 @@
             });
         }
 
-        // Tab switching — no server round-trip; we just filter the cached list.
         tabs.forEach(function(tab) {
             tab.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -569,8 +624,6 @@
             });
         }
 
-        // Outside click closes the panel — but not while a modal dialog
-        // (preferences) is visible on top of it.
         document.addEventListener('click', function(e) {
             if (panel.hidden) return;
             if (wrap.contains(e.target)) return;
@@ -580,55 +633,93 @@
             btn.setAttribute('aria-expanded', 'false');
         });
 
-        // Item click — three modes:
-        //   1. Toggle button on an unread row → mark as read, stay here
-        //   2. Toggle button on a read row   → mark as unread, stay here
-        //   3. Click anywhere else on the row → mark as read AND redirect
         list.addEventListener('click', function(e) {
-            var li = e.target.closest('.notifier-bell-item');
-            if (!li) return;
-            var id = parseInt(li.dataset.id, 10);
-            if (!id) return;
+            var subLi = e.target.closest('.notifier-bell-sub-item');
+            if (subLi) {
+                e.stopPropagation();
+                var subId = parseInt(subLi.dataset.id, 10);
+                if (!subId) return;
+
+                var subToggle = e.target.closest('.notifier-bell-item-toggle');
+                if (subToggle) {
+                    e.preventDefault();
+                    var subOp = subToggle.dataset.action === 'unread' ? fireMarkUnread : fireMarkRead;
+                    subOp(subId).then(refresh);
+                    return;
+                }
+
+                var subUrl = subLi.dataset.url;
+                if (subUrl && isSameOrigin(subUrl)) {
+                    e.preventDefault();
+                    fireMarkRead(subId).then(function() {
+                        window.location.href = subUrl;
+                    });
+                } else {
+                    fireMarkRead(subId).then(refresh);
+                }
+                return;
+            }
+
+            var groupLi = e.target.closest('.notifier-bell-group');
+            if (!groupLi) return;
+            var key = groupLi.dataset.key;
+            if (!key) return;
+
+            var expandBtn = e.target.closest('.notifier-bell-group-expand');
+            if (expandBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (state.expanded.has(key)) state.expanded.delete(key);
+                else                         state.expanded.add(key);
+                render();
+                return;
+            }
 
             var toggleBtn = e.target.closest('.notifier-bell-item-toggle');
             if (toggleBtn) {
                 e.preventDefault();
                 e.stopPropagation();
-                var action = toggleBtn.dataset.action;  // 'read' | 'unread'
-                var op = action === 'unread' ? fireMarkUnread : fireMarkRead;
-                op(id).then(refresh);
+                var grpEvents = eventsForKey(key);
+                if (!grpEvents.length) return;
+
+                var ops;
+                if (toggleBtn.dataset.action === 'group-read') {
+                    ops = grpEvents
+                        .filter(function(ev) { return !ev.is_read; })
+                        .map(function(ev) { return fireMarkRead(ev.id); });
+                } else {
+                    ops = grpEvents
+                        .filter(function(ev) { return ev.is_read; })
+                        .map(function(ev) { return fireMarkUnread(ev.id); });
+                }
+                Promise.all(ops).then(refresh);
                 return;
             }
 
-            // Click-to-navigate: fire the markread request and wait for its
-            // response before navigating, so the row is guaranteed to be
-            // marked as read by the time the target page renders.
-            // Reject any non-same-origin target: the `url` column is
-            // populated from the hook-side object's getFormURLWithID() and
-            // should always be same-origin, but the DB column is a plain
-            // VARCHAR(500) with no constraint — a future code path that
-            // lets user input flow into it must not turn the bell into an
-            // open-redirect phishing vector.
-            var url = li.dataset.url;
+            // Body click → navigate. Open-redirect guard: the `url` column
+            // is a VARCHAR(500) with no DB constraint, refuse off-origin
+            // even though getFormURLWithID() should never produce one.
+            var url = groupLi.dataset.url;
+            var unreadIds = eventsForKey(key)
+                .filter(function(ev) { return !ev.is_read; })
+                .map(function(ev) { return ev.id; });
+            var markPromises = unreadIds.map(function(id) { return fireMarkRead(id); });
+
             if (url && isSameOrigin(url)) {
                 e.preventDefault();
-                fireMarkRead(id).then(function() {
+                Promise.all(markPromises).then(function() {
                     window.location.href = url;
                 });
             } else {
-                fireMarkRead(id).then(refresh);
+                Promise.all(markPromises).then(refresh);
             }
         });
 
         markAll.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (window.console) console.info('[notifier] mark all as read: start');
             fetchJson(BASE_URL + '/ajax/markallread.php')
-                .then(function(r) {
-                    if (window.console) console.info('[notifier] mark all as read: ok', r);
-                    refresh();
-                })
+                .then(refresh)
                 .catch(function(err) {
                     if (window.console) console.error('[notifier] mark all as read failed:', err);
                 });
@@ -641,11 +732,12 @@
         if (pollInFlight) return;
         pollInFlight = true;
         fetchJson(BASE_URL + '/ajax/list.php').then(function(data) {
-            state.items  = (data && data.items) || [];
-            state.unread = (data && data.unread) || 0;
+            state.items        = (data && data.items) || [];
+            state.unread       = (data && data.unread) || 0;
+            state.unreadGroups = (data && data.unread_groups) || 0;
             render();
         }).catch(function() {
-            // Fail silently — bell stays at previous state.
+            /* leave previous state intact */
         }).then(function() {
             pollInFlight = false;
         });
@@ -670,16 +762,12 @@
 
     function boot() {
         BASE_URL = resolveBaseUrl();
-        if (window.console && console.info) {
-            console.info('[notifier] booting, BASE_URL =', BASE_URL);
-        }
-        // Hydrate the translation dict before mounting so every label
-        // renders in the session language on first paint.
+        // Hydrate T before mount so the first paint is in-language.
         fetchJson(BASE_URL + '/ajax/i18n.php')
             .then(function(dict) {
                 Object.keys(dict || {}).forEach(function(k) { T[k] = dict[k]; });
             })
-            .catch(function() { /* stay on English defaults */ })
+            .catch(function() { /* English fallbacks */ })
             .then(mountAndStart);
     }
 

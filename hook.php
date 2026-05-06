@@ -1,15 +1,7 @@
 <?php
 
-/**
- * Notifier Plugin - Install/Uninstall hooks
- */
+// Notifier — install / uninstall hooks.
 
-
-/**
- * Plugin install process
- *
- * @return boolean
- */
 function plugin_notifier_install(): bool
 {
     global $DB;
@@ -18,16 +10,6 @@ function plugin_notifier_install(): bool
     $default_collation = DBConnection::getDefaultCollation();
     $migration         = new Migration(PLUGIN_NOTIFIER_VERSION);
 
-    // =========================================================================
-    // Table: glpi_plugin_notifier_notifications
-    //
-    // One row per bell notification. `users_id` is the recipient (not the
-    // actor). `itemtype` + `items_id` point at the GLPI object the
-    // notification is about, so clicking in the bell can redirect to it.
-    // `event` is a short slug (assigned / commented / status_changed / ...).
-    // `actor_users_id` is who triggered it, so we can render "John updated
-    // ticket #42" without another join at render time.
-    // =========================================================================
     if (!$DB->tableExists('glpi_plugin_notifier_notifications')) {
         $query = "CREATE TABLE `glpi_plugin_notifier_notifications` (
             `id`              INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -36,7 +18,7 @@ function plugin_notifier_install(): bool
             `itemtype`        VARCHAR(100) NOT NULL DEFAULT '',
             `items_id`        INT UNSIGNED NOT NULL DEFAULT 0,
             `event`           VARCHAR(50) NOT NULL DEFAULT '',
-            `channel`         VARCHAR(10) NOT NULL DEFAULT '' COMMENT 'direct | group — used by the preferences filter at read time',
+            `channel`         VARCHAR(10) NOT NULL DEFAULT '' COMMENT 'direct | group',
             `title`           VARCHAR(255) NOT NULL DEFAULT '',
             `message`         TEXT,
             `url`             VARCHAR(500) NOT NULL DEFAULT '',
@@ -53,11 +35,8 @@ function plugin_notifier_install(): bool
         ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC";
         $DB->doQueryOrDie($query, $DB->error());
     } elseif (!$DB->fieldExists('glpi_plugin_notifier_notifications', 'channel')) {
-        // Upgrade path: the channel column was introduced when preferences
-        // moved from insert-time gating to read-time filtering. Existing
-        // rows get an empty channel and therefore bypass the filter, which
-        // is the right default — they were already allowed through by the
-        // old insert-time check.
+        // Upgrade path: pre-channel rows get '' and bypass the read-time
+        // filter — that mirrors the old insert-time gating behaviour.
         $DB->doQueryOrDie(
             "ALTER TABLE `glpi_plugin_notifier_notifications`
              ADD COLUMN `channel` VARCHAR(10) NOT NULL DEFAULT '' AFTER `event`",
@@ -65,21 +44,7 @@ function plugin_notifier_install(): bool
         );
     }
 
-    // =========================================================================
-    // Table: glpi_plugin_notifier_preferences
-    //
-    // Per-user fine-grained opt-out flags. One row per user; each column is
-    // a boolean for "should this user receive notifications of category X".
-    // All flags default to 1 (opt-out model) so a fresh install matches the
-    // pre-preferences behaviour: every signal fans out to every actor.
-    //
-    // Naming: notify_<itemtype_slug>_<channel>
-    //   <itemtype_slug>: ticket | change | problem | projecttask
-    //   <channel>:       direct  → assignee / requester / observer / watcher
-    //                    group   → member of a group linked to the item
-    //
-    // Missing row is treated as "all defaults (1)" — we never force-insert.
-    // =========================================================================
+    // Opt-out preferences: missing row = all-on. notify_<type>_<channel>.
     if (!$DB->tableExists('glpi_plugin_notifier_preferences')) {
         $query = "CREATE TABLE `glpi_plugin_notifier_preferences` (
             `users_id`                    INT UNSIGNED NOT NULL,
@@ -97,14 +62,10 @@ function plugin_notifier_install(): bool
         $DB->doQueryOrDie($query, $DB->error());
     }
 
-    // Clean up legacy profile table from earlier RBAC versions. The plugin
-    // no longer does right-based gating — every logged-in user sees their
-    // own bell — so the junction table is dead weight.
+    // Drop legacy RBAC artefacts from earlier versions.
     if ($DB->tableExists('glpi_plugin_notifier_profiles')) {
         $DB->doQueryOrDie("DROP TABLE `glpi_plugin_notifier_profiles`", $DB->error());
     }
-    // Drop legacy profile-right rows too, in case installRights() seeded them
-    // before the RBAC removal.
     $DB->delete('glpi_profilerights', ['name' => 'plugin_notifier_notification']);
 
     $migration->executeMigration();
@@ -112,11 +73,6 @@ function plugin_notifier_install(): bool
     return true;
 }
 
-/**
- * Plugin uninstall process
- *
- * @return boolean
- */
 function plugin_notifier_uninstall(): bool
 {
     global $DB;
@@ -124,8 +80,7 @@ function plugin_notifier_uninstall(): bool
     $tables = [
         'glpi_plugin_notifier_notifications',
         'glpi_plugin_notifier_preferences',
-        // Legacy — harmless if it doesn't exist.
-        'glpi_plugin_notifier_profiles',
+        'glpi_plugin_notifier_profiles', // legacy
     ];
 
     foreach ($tables as $table) {
@@ -134,28 +89,16 @@ function plugin_notifier_uninstall(): bool
         }
     }
 
-    // Legacy profile-right rows.
     $DB->delete('glpi_profilerights', ['name' => 'plugin_notifier_notification']);
 
     return true;
 }
 
-/**
- * Check prerequisites before install
- *
- * @return boolean
- */
 function plugin_notifier_check_prerequisites(): bool
 {
     return true;
 }
 
-/**
- * Check configuration
- *
- * @param bool $verbose
- * @return boolean
- */
 function plugin_notifier_check_config(bool $verbose = false): bool
 {
     return true;

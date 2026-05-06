@@ -1,16 +1,8 @@
 <?php
 
-/**
- * Mark all of the current user's notifications as read.
- *
- * GET: no parameters — everything is resolved from session.
- * Returns: { success, unread }
- *
- * GET (not POST) is deliberate: GLPI 11's Symfony CheckCsrfListener runs
- * automatically on POST routes and doesn't accept fresh tokens minted via
- * our csrftoken.php endpoint. The endpoint is still session-authenticated
- * and only mutates rows owned by the logged-in user, so CSRF risk is nil.
- */
+// GET (not POST): GLPI 11's Symfony CheckCsrfListener auto-runs on POST
+// routes and rejects our minted tokens. Session + ownership scope means
+// CSRF risk is nil for this self-only mutation.
 
 if (!defined('GLPI_ROOT')) {
     include(dirname(__DIR__, 3) . '/inc/includes.php');

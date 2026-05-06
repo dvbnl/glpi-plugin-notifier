@@ -1,15 +1,6 @@
 <?php
 
-/**
- * Mark a single notification as unread (owned by session user).
- *
- * GET: id
- * Returns: { success, unread }
- *
- * GET for the same reason as markread.php — bypasses GLPI 11's Symfony
- * CheckCsrfListener which only runs on POST routes. Endpoint still
- * session-authenticated and only mutates rows owned by the logged-in user.
- */
+// GET (not POST): see markread.php for the rationale.
 
 if (!defined('GLPI_ROOT')) {
     include(dirname(__DIR__, 3) . '/inc/includes.php');

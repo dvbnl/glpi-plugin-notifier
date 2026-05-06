@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: notifier 1.0.0\n"
+"Project-Id-Version: notifier 1.0.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-15 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -125,4 +125,13 @@ msgid "Preferences saved"
 msgstr ""
 
 msgid "Close"
+msgstr ""
+
+msgid "{n} updates"
+msgstr ""
+
+msgid "Show all updates"
+msgstr ""
+
+msgid "Hide updates"
 msgstr ""

@@ -25,20 +25,16 @@ use Toolbox;
 use QueryExpression;
 
 /**
- * Notification - Persistent store for in-app bell notifications.
- *
- * Each row is "X happened, Y should see a bell badge for it". The class
- * is wired from setup.php into GLPI's item_add / item_update hooks for
- * every ITIL-ish type we care about and fans the event out to every
- * affected user.
+ * Persistent store for in-app bell notifications. setup.php wires this
+ * into GLPI's item_add / item_update hooks and the dispatcher fans the
+ * event out to every affected user.
  */
 class Notification extends CommonDBTM
 {
-    // Every authenticated user sees their own bell — no right gating.
     public static $rightname = '';
     public $dohistory        = false;
 
-    // Event slugs. Keep short — used as CSS modifier and i18n key.
+    // Slugs double as CSS modifier and i18n key — keep short.
     const EVENT_ASSIGNED       = 'assigned';
     const EVENT_CREATED        = 'created';
     const EVENT_COMMENTED      = 'commented';
@@ -57,20 +53,13 @@ class Notification extends CommonDBTM
         return 'glpi_plugin_notifier_notifications';
     }
 
-    // =========================================================================
-    // Preferences — per-user opt-out flags, one row per user in
-    // glpi_plugin_notifier_preferences. A missing row means "all defaults" so
-    // a fresh user (or an install before the preferences table was added)
-    // gets every notification.
+    // ------------------------------------------------------------------ preferences
     //
-    // Preferences are a *view filter*, not a subscription. Every event still
-    // produces a notification row; the filter is applied at read time in
-    // getForUser() / countUnread(), so flipping a flag back on reveals the
-    // history instead of silently dropping it. The bell never force-inserts
-    // a preferences row.
-    // =========================================================================
+    // Per-user opt-out flags in glpi_plugin_notifier_preferences, missing
+    // row = all defaults. Preferences are a *view filter*, not a
+    // subscription — every event is still stored, the filter applies at
+    // read time so flipping a flag back on resurfaces history.
 
-    /** Defaults for every preference column — opt-out model (all 1). */
     public static function getDefaultPreferences(): array
     {
         return [
@@ -85,30 +74,13 @@ class Notification extends CommonDBTM
         ];
     }
 
-    /**
-     * Per-request memoisation cache for getPreferences(). Reads happen
-     * per-request from list.php / markread.php etc.; a single call may
-     * touch prefs several times (count + list) and we want to avoid a DB
-     * round-trip each time. savePreferences() clears the slot it just
-     * wrote so subsequent reads see fresh values.
-     *
-     * @var array<int, array<string, int>>
-     */
+    /** @var array<int, array<string, int>> per-request memo for getPreferences() */
     private static array $prefsCache = [];
 
-    /**
-     * One-time-per-request guard for the notifications schema migration
-     * (adding the `channel` column on installs that predate read-time
-     * filtering). `false` means "not yet checked this request".
-     */
     private static bool $schemaEnsured = false;
 
-    /**
-     * Create the preferences table on demand. Covers installs that predate
-     * the table (plugin was installed before preferences were introduced):
-     * re-running the plugin install via the UI is the canonical upgrade
-     * path, but an idempotent runtime guard spares users the round-trip.
-     */
+    // Idempotent runtime safety net for installs that predate the table;
+    // re-running plugin install via the UI is the canonical upgrade path.
     private static function ensurePreferencesTable(): bool
     {
         global $DB;
@@ -137,9 +109,6 @@ class Notification extends CommonDBTM
         return (bool)$DB->doQuery($query);
     }
 
-    /**
-     * Load a single user's preferences merged over the defaults.
-     */
     public static function getPreferences(int $users_id): array
     {
         global $DB;
@@ -170,9 +139,6 @@ class Notification extends CommonDBTM
         return self::$prefsCache[$users_id] = $prefs;
     }
 
-    /**
-     * Persist preferences for a user. Only known columns are written.
-     */
     public static function savePreferences(int $users_id, array $input): bool
     {
         global $DB;
@@ -192,24 +158,17 @@ class Notification extends CommonDBTM
         }
         $row['date_mod'] = date('Y-m-d H:i:s');
 
-        // Upsert: delete then insert — cheap with a single-row PK.
+        // Upsert via delete+insert — single-row PK keeps it cheap.
         $DB->delete('glpi_plugin_notifier_preferences', ['users_id' => $users_id]);
         $DB->insert('glpi_plugin_notifier_preferences', $row);
 
-        // Invalidate the per-request cache so a subsequent getPreferences()
-        // in the same AJAX call (preferences.php echoes the row right back)
-        // reads what we just persisted.
         unset(self::$prefsCache[$users_id]);
         return true;
     }
 
     /**
-     * Build a WHERE fragment that excludes notifications whose
-     * (itemtype, channel) combo the user has opted out of.
-     *
-     * Returns `null` when no filter applies (all flags on, or no prefs
-     * row). The returned QueryExpression can be appended to the WHERE of
-     * a DB->request call.
+     * WHERE fragment that excludes (itemtype, channel) combos the user
+     * has opted out of. Returns null when no filter applies.
      */
     private static function prefFilterExpression(int $users_id): ?QueryExpression
     {
@@ -222,12 +181,9 @@ class Notification extends CommonDBTM
             'projecttask' => 'ProjectTask',
         ];
 
-        // Rows written before the `channel` column existed carry channel=''
-        // — we can't backfill them so we apply a special rule: if a user
-        // opts out of BOTH channels for a type, they've effectively
-        // silenced that type entirely, so legacy rows of that type get
-        // hidden too. Partial opt-out leaves legacy rows visible because
-        // we can't tell which channel they belonged to.
+        // Pre-channel rows carry channel='' and can't be backfilled.
+        // Full opt-out hides them too; partial opt-out leaves them
+        // visible since we can't tell which channel they belonged to.
         $disabled = [];
         foreach ($typeMap as $slug => $itemtype) {
             $directOff = empty($prefs['notify_' . $slug . '_direct']);
@@ -249,21 +205,8 @@ class Notification extends CommonDBTM
         return new QueryExpression('NOT (' . implode(' OR ', $disabled) . ')');
     }
 
-    // =========================================================================
-    // Event dispatch
-    // =========================================================================
+    // ------------------------------------------------------------------ event dispatch
 
-    /**
-     * Main entry point called by PLUGIN_HOOKS item_add / item_update.
-     *
-     * GLPI passes the freshly added/updated object. We inspect its type
-     * and the set of modified fields ($item->updates) to decide:
-     *   - what kind of event this is
-     *   - who is affected (should get a bell row)
-     *
-     * The actor (who triggered it) is filtered out so nobody gets a bell
-     * for their own action.
-     */
     public static function handleItemEvent($item): void
     {
         if (!is_object($item) || !isset($item->fields['id'])) {
@@ -272,7 +215,6 @@ class Notification extends CommonDBTM
 
         $type = $item::getType();
 
-        // ITIL parent objects: Ticket / Change / Problem / ProjectTask
         if (in_array($type, ['Ticket', 'Change', 'Problem'], true)) {
             self::handleItilParent($item);
             return;
@@ -283,7 +225,6 @@ class Notification extends CommonDBTM
             return;
         }
 
-        // Followups and tasks are children of a parent ITIL object.
         if ($type === 'ITILFollowup') {
             self::handleFollowup($item);
             return;
@@ -299,9 +240,6 @@ class Notification extends CommonDBTM
             return;
         }
 
-        // Actor junctions — fired on item_add when someone is assigned to
-        // an existing ITIL object. Only user-actors of type ASSIGN (=2)
-        // are considered a notifiable event.
         $itilUserMap = [
             'Ticket_User'  => ['parent' => 'Ticket',  'fk' => 'tickets_id'],
             'Change_User'  => ['parent' => 'Change',  'fk' => 'changes_id'],
@@ -328,28 +266,16 @@ class Notification extends CommonDBTM
         }
     }
 
-    /**
-     * Handle Ticket / Change / Problem add or update.
-     */
     private static function handleItilParent(CommonDBTM $item): void
     {
-        $type     = $item::getType();
-        $id       = (int)$item->fields['id'];
-        // On item_add, CommonDBTM does not populate $item->updates, so an
-        // empty updates list means "this is a create".
+        $type = $item::getType();
+        $id   = (int)$item->fields['id'];
+        // CommonDBTM leaves $item->updates empty on item_add.
         $isCreate = empty($item->updates ?? []);
 
         $updates = $item->updates ?? [];
-
-        // Figure out which field changes we care about.
         $watchedFields = ['status', 'content', 'name', 'priority', 'urgency', 'users_id_lastupdater'];
         $relevant = array_intersect($updates, $watchedFields);
-
-        // "Assignment changed" is tracked via the *_users junction rather
-        // than a field on the parent, so we rely on the Assign_User hook
-        // (item_add for Ticket_User etc.) — handled separately below.
-        // Here we only emit a generic update event when a watched field
-        // changed AND it's an update (not create).
 
         $targets = self::collectActorsForItil($item);
         unset($targets[(int)Session::getLoginUserID()]);
@@ -384,7 +310,6 @@ class Notification extends CommonDBTM
             $event   = self::EVENT_UPDATED;
             $message = __('Item updated', 'notifier');
         } else {
-            // Nothing we care about — bail without touching the table.
             return;
         }
 
@@ -402,17 +327,12 @@ class Notification extends CommonDBTM
         }
     }
 
-    /**
-     * Handle ProjectTask add/update.
-     *
-     * ProjectTask has its own team junction (glpi_projecttaskteams) rather
-     * than the ITIL actor pattern — we resolve members from there.
-     */
     private static function handleProjectTask(CommonDBTM $item): void
     {
         $id       = (int)$item->fields['id'];
         $isCreate = empty($item->updates);
 
+        // ProjectTask uses its own team junction, not the ITIL actor pattern.
         $targets = self::collectProjectTaskMembers($id);
         unset($targets[(int)Session::getLoginUserID()]);
 
@@ -454,9 +374,6 @@ class Notification extends CommonDBTM
         }
     }
 
-    /**
-     * Handle a new ITILFollowup (comment on a ticket/change/problem).
-     */
     private static function handleFollowup(CommonDBTM $item): void
     {
         $parentType = $item->fields['itemtype'] ?? '';
@@ -495,9 +412,6 @@ class Notification extends CommonDBTM
         }
     }
 
-    /**
-     * Handle a new TicketTask / ChangeTask / ProblemTask.
-     */
     private static function handleItilTask(CommonDBTM $item): void
     {
         $type = $item::getType();
@@ -523,10 +437,8 @@ class Notification extends CommonDBTM
 
         $targets = self::collectActorsForItil($parent);
 
-        // If the task has an explicit assigned user, make sure they're
-        // always notified — even if they're not an actor on the parent.
-        // Mark them as 'direct' so the group-only opt-out never silences
-        // a technician who was handed the task by name.
+        // A named tech is always notified, marked 'direct' so a group-only
+        // opt-out can't silence them.
         if (!empty($item->fields['users_id_tech'])) {
             $targets[(int)$item->fields['users_id_tech']] = 'direct';
         }
@@ -553,9 +465,6 @@ class Notification extends CommonDBTM
         }
     }
 
-    /**
-     * Handle a new ITILSolution (proposed or applied solution).
-     */
     private static function handleSolution(CommonDBTM $item): void
     {
         $parentType = $item->fields['itemtype'] ?? '';
@@ -592,18 +501,11 @@ class Notification extends CommonDBTM
         }
     }
 
-    /**
-     * Handle Ticket_User / Change_User / Problem_User row add.
-     *
-     * Fires whenever a user is attached to an existing ITIL object. We only
-     * emit a bell when the link type is ASSIGN (type = 2) — requesters and
-     * observers set themselves during normal ticket-creation flow and
-     * don't need to hear about it.
-     */
+    // Only ASSIGN (CommonITILActor::ASSIGN = 2) gets a bell — requesters
+    // and observers are noise during ticket creation. Hard-coded to avoid
+    // a use-statement dependency in hook context.
     private static function handleItilUserLink(CommonDBTM $item, string $parentType, string $fk): void
     {
-        // CommonITILActor::ASSIGN = 2 (we hard-code to avoid a use-statement
-        // dependency in hook context).
         $linkType = (int)($item->fields['type'] ?? 0);
         if ($linkType !== 2) {
             return;
@@ -615,7 +517,6 @@ class Notification extends CommonDBTM
             return;
         }
 
-        // Don't notify the actor about their own assignment (self-assign).
         if ($targetUser === (int)Session::getLoginUserID()) {
             return;
         }
@@ -637,13 +538,6 @@ class Notification extends CommonDBTM
         ]);
     }
 
-    /**
-     * Handle Group_Ticket / Change_Group / Group_Problem row add.
-     *
-     * Fires when a group is attached to an existing ITIL object. Same as
-     * user-link, only for type=ASSIGN; fans out to every member of the
-     * group.
-     */
     private static function handleItilGroupLink(CommonDBTM $item, string $parentType, string $fk): void
     {
         global $DB;
@@ -692,9 +586,6 @@ class Notification extends CommonDBTM
         }
     }
 
-    /**
-     * Handle ProjectTaskTeam row add — a user or group added to a task's team.
-     */
     private static function handleProjectTaskTeamLink(CommonDBTM $item): void
     {
         global $DB;
@@ -753,18 +644,12 @@ class Notification extends CommonDBTM
         }
     }
 
-    // =========================================================================
-    // Actor collection helpers
-    // =========================================================================
+    // ------------------------------------------------------------------ actor collection
 
     /**
-     * Resolve every user that should be notified about a Ticket/Change/Problem.
-     *
-     * Returns `[user_id => channel]` where `channel` is either `'direct'`
-     * (requester / observer / assign user link) or `'group'` (member of a
-     * group linked to the item). When a user qualifies via both, the
-     * stronger `'direct'` wins so per-type group-only opt-outs never drop
-     * someone who was personally added.
+     * Returns [user_id => channel] where channel is 'direct' (personal
+     * actor) or 'group' (via group link). Direct beats group when both
+     * apply, so a group-only opt-out can't silence a personal actor.
      */
     private static function collectActorsForItil(CommonDBTM $item): array
     {
@@ -785,7 +670,6 @@ class Notification extends CommonDBTM
         $users  = [];
         $groups = [];
 
-        // Directly-linked users (requester / observer / assign)
         $rs = $DB->request([
             'SELECT' => ['users_id'],
             'FROM'   => $linkMap[$type]['users'],
@@ -798,7 +682,6 @@ class Notification extends CommonDBTM
             }
         }
 
-        // Directly-linked groups — expand to members
         $rs = $DB->request([
             'SELECT' => ['groups_id'],
             'FROM'   => $linkMap[$type]['groups'],
@@ -828,12 +711,6 @@ class Notification extends CommonDBTM
         return $users;
     }
 
-    /**
-     * Resolve every user linked to a ProjectTask via its team junction.
-     *
-     * Same return shape as {@see collectActorsForItil()}:
-     * `[uid => 'direct'|'group']`.
-     */
     private static function collectProjectTaskMembers(int $taskId): array
     {
         global $DB;
@@ -877,9 +754,6 @@ class Notification extends CommonDBTM
         return $users;
     }
 
-    /**
-     * Pretty title for a given item: "[Ticket #42] Broken printer".
-     */
     private static function formatItemTitle(CommonDBTM $item): string
     {
         $type = $item::getType();
@@ -892,16 +766,10 @@ class Notification extends CommonDBTM
         return sprintf('[%s #%d] %s', $type, $id, $name);
     }
 
-    // =========================================================================
-    // Insert / read / mark-read / cleanup
-    // =========================================================================
+    // ------------------------------------------------------------------ insert / read / cleanup
 
-    /**
-     * Lazy schema migration for the notifications table. Adds the
-     * `channel` column on installs that predate read-time filtering so
-     * users don't need to re-run the plugin install. One check per
-     * request (static flag); no-op after the first call.
-     */
+    // Lazy migration: adds the `channel` column on installs that predate
+    // read-time filtering. Once-per-request, no-op after the first call.
     private static function ensureNotificationsSchema(): void
     {
         global $DB;
@@ -912,7 +780,6 @@ class Notification extends CommonDBTM
         self::$schemaEnsured = true;
 
         if (!$DB->tableExists('glpi_plugin_notifier_notifications')) {
-            // The bigger install will recreate it; nothing to migrate.
             return;
         }
         if ($DB->fieldExists('glpi_plugin_notifier_notifications', 'channel')) {
@@ -925,13 +792,9 @@ class Notification extends CommonDBTM
     }
 
     /**
-     * Insert a notification row. Deduplicates against the most recent
-     * unread notification for the same user/item/event to avoid bell spam
-     * when a form saves multiple times in one request.
-     *
-     * `channel` is 'direct' (personal actor on the item) or 'group'
-     * (reached through a group link); it's persisted so the preferences
-     * filter at read time can match the right opt-out flag.
+     * Insert a notification row, deduplicated against the most recent
+     * unread row for the same user/item/event in the last 60 seconds —
+     * a single form save can fire several hooks and we don't want spam.
      */
     public static function insert(array $data): void
     {
@@ -949,7 +812,6 @@ class Notification extends CommonDBTM
 
         self::ensureNotificationsSchema();
 
-        // Dedup window: last 60 seconds, same user/item/event, still unread.
         $recent = $DB->request([
             'SELECT' => ['id'],
             'FROM'   => 'glpi_plugin_notifier_notifications',
@@ -985,13 +847,6 @@ class Notification extends CommonDBTM
         ]);
     }
 
-    /**
-     * Get latest notifications for the session user. Most recent first.
-     *
-     * Applies the per-user preference filter so items of types the user
-     * has opted out of are hidden — but still live in the table, so
-     * flipping the flag back on makes them reappear.
-     */
     public static function getForUser(int $users_id, int $limit = 25): array
     {
         global $DB;
@@ -1029,12 +884,6 @@ class Notification extends CommonDBTM
         return $rows;
     }
 
-    /**
-     * Count unread notifications for a user.
-     *
-     * Applies the same preference filter as getForUser() so the badge
-     * matches what the panel actually shows.
-     */
     public static function countUnread(int $users_id): int
     {
         global $DB;
@@ -1060,9 +909,33 @@ class Notification extends CommonDBTM
     }
 
     /**
-     * Mark a single notification as read. Only allowed on rows owned by
-     * the session user.
+     * Number of unique source items with at least one unread row — what
+     * the bell badge shows. Mirrors the JS-side groupKey().
      */
+    public static function countUnreadGroups(int $users_id): int
+    {
+        global $DB;
+
+        self::ensureNotificationsSchema();
+
+        $where = [
+            'users_id' => $users_id,
+            'is_read'  => 0,
+        ];
+        $filter = self::prefFilterExpression($users_id);
+        if ($filter !== null) {
+            $where[] = $filter;
+        }
+
+        $rs = $DB->request([
+            'SELECT' => [new QueryExpression('COUNT(DISTINCT `itemtype`, `items_id`) AS cpt')],
+            'FROM'   => 'glpi_plugin_notifier_notifications',
+            'WHERE'  => $where,
+        ]);
+        $row = $rs->current();
+        return (int)($row['cpt'] ?? 0);
+    }
+
     public static function markRead(int $id, int $users_id): bool
     {
         global $DB;
@@ -1076,10 +949,6 @@ class Notification extends CommonDBTM
         );
     }
 
-    /**
-     * Mark a single notification as unread (undoes markRead). Only
-     * allowed on rows owned by the session user.
-     */
     public static function markUnread(int $id, int $users_id): bool
     {
         global $DB;
@@ -1093,9 +962,6 @@ class Notification extends CommonDBTM
         );
     }
 
-    /**
-     * Mark every notification for this user as read.
-     */
     public static function markAllRead(int $users_id): bool
     {
         global $DB;
@@ -1109,10 +975,7 @@ class Notification extends CommonDBTM
         );
     }
 
-    /**
-     * Called from PLUGIN_HOOKS item_purge — wipe any notification pointing
-     * at a now-deleted item so the bell never dangles.
-     */
+    // PLUGIN_HOOKS item_purge — keeps the bell from dangling.
     public static function cleanForItem($item): void
     {
         global $DB;
@@ -1125,9 +988,6 @@ class Notification extends CommonDBTM
         ]);
     }
 
-    /**
-     * Friendly name for an actor id. Returns empty string for system/unknown.
-     */
     private static function actorName(int $users_id): string
     {
         if ($users_id <= 0) {

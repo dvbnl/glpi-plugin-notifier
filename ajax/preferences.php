@@ -1,25 +1,10 @@
 <?php
 
-/**
- * Get / save the current user's notification preferences.
- *
- * Both read and write go over GET:
- *
- *   GET                         → returns { preferences }
- *   GET ?save=1&notify_xxx=0...&_glpi_csrf_token=… → upsert, returns
- *                                   { success, preferences }
- *
- * GET for mutation is deliberate and matches the mark*.php endpoints:
- * GLPI 11's Symfony CheckCsrfListener auto-runs on POST and rejects
- * single-use tokens minted by csrftoken.php, so staying on GET sidesteps
- * the whole dance.
- *
- * Saves additionally require a fresh CSRF token (minted via
- * csrftoken.php). Without that, a malicious external page could flip a
- * logged-in user's preferences silently via an <img src=…> tag and
- * suppress their future notifications — session-authenticated does not
- * mean CSRF-safe for state mutation.
- */
+// GET ?save=1 → upsert (CSRF-token required); plain GET → returns prefs.
+// GET-for-mutation matches mark*.php — sidesteps GLPI 11's Symfony
+// CheckCsrfListener which auto-runs on POST and rejects minted tokens.
+// Saves still require Session::validateCSRF so a remote page can't flip
+// a user's preferences silently via <img src=…>.
 
 if (!defined('GLPI_ROOT')) {
     include(dirname(__DIR__, 3) . '/inc/includes.php');

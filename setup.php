@@ -30,11 +30,11 @@
 
 use Glpi\Plugin\Hooks;
 
-define('PLUGIN_NOTIFIER_VERSION', '1.0.1');
+define('PLUGIN_NOTIFIER_VERSION', '1.0.2');
 define('PLUGIN_NOTIFIER_MIN_GLPI', '10.0.0');
 define('PLUGIN_NOTIFIER_MAX_GLPI', '11.99.99');
 
-// Polyfill: htmlescape() was added in GLPI 10.0.x as bridge to GLPI 11
+// htmlescape() arrived in GLPI 10.0.x as the GLPI 11 bridge.
 if (!function_exists('htmlescape')) {
     function htmlescape(?string $string): string
     {
@@ -42,11 +42,6 @@ if (!function_exists('htmlescape')) {
     }
 }
 
-/**
- * Plugin description
- *
- * @return array
- */
 function plugin_version_notifier(): array
 {
     return [
@@ -67,20 +62,14 @@ function plugin_version_notifier(): array
     ];
 }
 
-/**
- * Init hooks of the plugin
- *
- * @return void
- */
 function plugin_init_notifier(): void
 {
     global $PLUGIN_HOOKS;
 
     $PLUGIN_HOOKS['csrf_compliant']['notifier'] = true;
 
-    // Add CSS and JS (public/ for GLPI 11, css/js/ for GLPI 10).
-    // Resolve relative to this file so the plugin works whether it lives
-    // under plugins/ or marketplace/.
+    // GLPI 11 prefers public/; GLPI 10 uses css/js/. Both copies must
+    // stay in sync — see CHANGELOG for the v1.0.2 drift incident.
     if (is_dir(__DIR__ . '/public/')) {
         $PLUGIN_HOOKS['add_css']['notifier'] = 'public/notifier.css';
         $PLUGIN_HOOKS['add_javascript']['notifier'] = 'public/notifier.js';
@@ -89,8 +78,7 @@ function plugin_init_notifier(): void
         $PLUGIN_HOOKS['add_javascript']['notifier'] = 'js/notifier.js';
     }
 
-    // The bell is only relevant in the central/technician interface.
-    // Self-service has its own flow and we don't want to leak here.
+    // Self-service has its own flow; central interface only.
     if (
         isset($_SESSION['glpiactiveprofile']['interface'])
         && $_SESSION['glpiactiveprofile']['interface'] === 'helpdesk'
@@ -99,16 +87,11 @@ function plugin_init_notifier(): void
         unset($PLUGIN_HOOKS['add_javascript']['notifier']);
     }
 
-    // Register the Notification class itself. No tabs — it's a passive store.
     Plugin::registerClass(
         'GlpiPlugin\Notifier\Notification',
         ['addtabon' => []]
     );
 
-    // =========================================================================
-    // Event hooks — capture "this affects you" signals across all ITIL types
-    // so Notification::handleItemEvent() can turn them into bell entries.
-    // =========================================================================
     $watched_types = [
         'Ticket',
         'Change',
@@ -119,15 +102,12 @@ function plugin_init_notifier(): void
         'ChangeTask',
         'ProblemTask',
         'ITILSolution',
-        // Actor junctions — fire when someone is assigned to an existing
-        // ITIL object. Fan-out logic lives in Notification::handleItemEvent.
         'Ticket_User',
         'Change_User',
         'Problem_User',
         'Group_Ticket',
         'Change_Group',
         'Group_Problem',
-        // ProjectTask team junction
         'ProjectTaskTeam',
     ];
 
@@ -138,8 +118,7 @@ function plugin_init_notifier(): void
         $PLUGIN_HOOKS[Hooks::ITEM_UPDATE]['notifier'][$type] = $dispatch;
     }
 
-    // When a notification's target item is purged, clean up notifications
-    // pointing at it so the bell never dangles.
+    // item_purge → drop dangling bell rows.
     $cleanup = ['GlpiPlugin\Notifier\Notification', 'cleanForItem'];
     foreach ($watched_types as $type) {
         $PLUGIN_HOOKS[Hooks::ITEM_PURGE]['notifier'][$type] = $cleanup;
