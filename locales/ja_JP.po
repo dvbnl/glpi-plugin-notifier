@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: notifier 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-15 00:00+0000\n"
-"PO-Revision-Date: 2026-05-05 11:01+0900\n"
+"PO-Revision-Date: 2026-05-11 11:24+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ja_JP\n"
@@ -133,3 +133,12 @@ msgstr "設定を保存しました"
 
 msgid "Close"
 msgstr "閉じる"
+
+msgid "{n} updates"
+msgstr "{n} 件の更新"
+
+msgid "Show all updates"
+msgstr "すべての更新を表示"
+
+msgid "Hide updates"
+msgstr "更新を非表示"
