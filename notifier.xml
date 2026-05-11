@@ -9,7 +9,7 @@
             <nl><![CDATA[In-app notificatiebel voor GLPI technici — elke actie die jou raakt (ticket, wijziging, probleem, projecttaak) verschijnt in een dropdown naast je avatar]]></nl>
             <fr><![CDATA[Cloche de notifications in-app pour les techniciens GLPI — chaque action qui vous concerne (ticket, changement, probleme, tache de projet) apparait dans un menu deroulant a cote de votre avatar]]></fr>
             <es><![CDATA[Campana de notificaciones in-app para tecnicos GLPI — cada accion que te afecta (ticket, cambio, problema, tarea de proyecto) aparece en un menu desplegable junto a tu avatar]]></es>
-            <ja><![CDATA[GLPI 技術者のためのアプリ内通知ベル — あなたがかかわったチケット・変更・問題・プロジェクトタスクについて、ベルでお知らせします。]]></ja>
+            <ja><![CDATA[GLPI 技術者のためのアプリ内通知ベル — あなたに関わるチケット・変更・問題・プロジェクトタスクについて、ベルでお知らせします。]]></ja>
         </short>
         <long>
             <en><![CDATA[Notifier adds a real-time notification bell to GLPI's top header, right next to the user avatar.
