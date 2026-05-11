@@ -1,25 +1,15 @@
 /**
- * Notifier plugin — bell widget styles.
- *
- * All colors go through CSS custom properties with sensible fallbacks, so
- * the widget automatically inherits GLPI/Tabler theme colors when they're
- * available. The plugin defines `--notifier-*` vars scoped to the wrap
- * (and to modals) and resolves them to Tabler theme vars first
- * (`--tblr-primary`, `--tblr-danger`, etc.) and hardcoded fallbacks only
- * when the theme does not expose them.
- *
- * Scoped under .notifier-bell-wrap / .notifier-modal-overlay so nothing
- * leaks into the rest of GLPI.
+ * Notifier bell styles. All `--notifier-*` vars resolve to Tabler theme
+ * vars first, hardcoded fallbacks only when the theme doesn't expose
+ * them. Scoped under .notifier-bell-wrap / .notifier-modal-overlay.
  */
 
 .notifier-bell-wrap,
 .notifier-modal-overlay {
-    /* Theme hooks — all color decisions funnel through these. */
     --notifier-primary:       var(--tblr-primary, var(--bs-primary, var(--primary, #0d6efd)));
     --notifier-primary-rgb:   var(--tblr-primary-rgb, var(--bs-primary-rgb, 13, 110, 253));
-    /* Derive the "pressed" shade from whatever --notifier-primary resolves
-       to — avoids a dangling --tblr-primary-darker fallback that always
-       lands on hardcoded blue regardless of theme. */
+    /* Derive the pressed shade from the resolved primary; --tblr-primary-darker
+       is unreliable across themes. */
     --notifier-primary-dark:  color-mix(in srgb, var(--notifier-primary), #000 14%);
     --notifier-danger:        var(--tblr-danger, #dc3545);
     --notifier-success:       var(--tblr-success, #198754);
@@ -43,10 +33,8 @@
     vertical-align: middle;
 }
 
-/* Floating mount: the bell lives fixed in the bottom-right of the
-   viewport, chat-widget style. Independent of any GLPI header markup,
-   never overlaps page content, works identically on desktop and
-   mobile. */
+/* Floating mount: GLPI header DOM varies by theme; fixed bottom-right
+   sidesteps every selector-based mount edge case. */
 .notifier-bell-wrap.notifier-bell-floating {
     position: fixed;
     bottom: 20px;
@@ -91,9 +79,6 @@
     box-shadow: 0 0 0 2px var(--notifier-surface);
 }
 
-/* Collapsed state: the bell slides to the right so only a narrow strip
-   sticks out from the viewport edge. The restore tab shows a chevron so
-   users can click it back in. Panel is forcibly hidden. */
 .notifier-bell-wrap.notifier-bell-floating.is-collapsed {
     right: -36px;
     transition: right .2s ease;
@@ -111,8 +96,6 @@
     display: none !important;
 }
 
-/* Restore "pull tab": a small chevron that floats just above the
-   collapsed bell so the user sees an affordance to bring it back. */
 .notifier-bell-restore {
     position: absolute;
     top: -10px;
@@ -137,8 +120,8 @@
     display: inline-flex;
 }
 
-/* Panel opens UPWARDS from the floating button, anchored to its right
-   edge so it never spills off-screen on narrow viewports. */
+/* Floating panel opens upwards from the button, anchored right-edge so
+   it never spills off-screen on narrow viewports. */
 .notifier-bell-wrap.notifier-bell-floating .notifier-bell-panel {
     top: auto;
     bottom: calc(100% + 12px);
@@ -147,7 +130,6 @@
     transform-origin: bottom right;
 }
 
-/* Mobile: panel fills most of the screen, button stays visible. */
 @media (max-width: 600px) {
     .notifier-bell-wrap.notifier-bell-floating {
         bottom: 14px;
@@ -209,7 +191,6 @@
     pointer-events: none;
 }
 
-/* Panel — the bigger, splashier dropdown. */
 .notifier-bell-panel {
     position: absolute;
     top: calc(100% + 6px);
@@ -261,8 +242,6 @@
     margin-left: 2px;
 }
 
-/* Tabs row — All / Unread / Mark all. Inspired by modern tabbed panels:
-   an underline marks the active tab so switching feels physical. */
 .notifier-bell-tabs {
     display: flex;
     align-items: center;
@@ -377,13 +356,22 @@
 }
 
 .notifier-bell-item.is-unread {
-    background: var(--notifier-surface);
+    background: rgba(var(--notifier-primary-rgb), .07);
     border-left: 3px solid var(--notifier-primary);
     padding-left: 13px;
 }
 
+.notifier-bell-item.is-unread .notifier-bell-item-title {
+    font-weight: 700;
+    color: var(--notifier-text);
+}
+
+.notifier-bell-item.is-unread .notifier-bell-item-msg {
+    color: var(--notifier-text);
+}
+
 .notifier-bell-item.is-unread:hover {
-    background: rgba(var(--notifier-primary-rgb), .06);
+    background: rgba(var(--notifier-primary-rgb), .12);
 }
 
 .notifier-bell-item-icon {
@@ -442,8 +430,6 @@
     margin-top: 3px;
 }
 
-/* Per-item toggle button: mark read (check) on unread rows,
-   mark unread (undo) on read rows. */
 .notifier-bell-item-toggle {
     flex: 0 0 auto;
     align-self: center;
@@ -471,8 +457,6 @@
     outline: 0;
 }
 
-/* Read rows dim their toggle slightly so the primary action for unread
-   rows visually stands out. */
 .notifier-bell-item.is-read .notifier-bell-item-toggle {
     border-color: var(--notifier-border);
     color: var(--notifier-text-muted);
@@ -484,7 +468,134 @@
     background: var(--notifier-surface);
 }
 
-/* Empty state — illustrative, not just a text line. */
+/* ====== Grouped notifications ====== */
+
+.notifier-bell-group {
+    list-style: none;
+    border-bottom: 1px solid var(--notifier-border);
+}
+
+.notifier-bell-group:last-child {
+    border-bottom: 0;
+}
+
+/* The list-level border lives on the group <li>; strip it from the inner
+   header to avoid doubling. */
+.notifier-bell-group-header {
+    border-bottom: 0 !important;
+}
+
+.notifier-bell-group-expand {
+    flex: 0 0 auto;
+    align-self: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    margin-left: 4px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--notifier-text-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: background .12s ease, color .12s ease, transform .15s ease;
+}
+
+.notifier-bell-group-expand:hover,
+.notifier-bell-group-expand:focus-visible {
+    background: rgba(var(--notifier-primary-rgb), .1);
+    color: var(--notifier-primary);
+    outline: 0;
+}
+
+.notifier-bell-group.is-expanded .notifier-bell-group-expand {
+    color: var(--notifier-primary);
+    transform: rotate(180deg);
+}
+
+.notifier-bell-group-meta-count {
+    font-weight: 600;
+    color: var(--notifier-primary);
+    margin-left: 2px;
+}
+
+.notifier-bell-subs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: var(--notifier-surface-alt);
+    border-top: 1px solid var(--notifier-border);
+}
+
+.notifier-bell-sub-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 16px 10px 56px;  /* 56px aligns with the group icon column */
+    border-bottom: 1px solid var(--notifier-border);
+    cursor: pointer;
+    transition: background-color .12s ease;
+    background: transparent;
+}
+
+.notifier-bell-sub-item:last-child {
+    border-bottom: 0;
+}
+
+.notifier-bell-sub-item:hover {
+    background: var(--notifier-row-hover);
+}
+
+.notifier-bell-sub-item.is-unread {
+    background: rgba(var(--notifier-primary-rgb), .07);
+}
+
+.notifier-bell-sub-item.is-unread:hover {
+    background: rgba(var(--notifier-primary-rgb), .12);
+}
+
+.notifier-bell-sub-icon {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--notifier-surface);
+    border: 1px solid var(--notifier-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--notifier-text-muted);
+    font-size: 11px;
+}
+
+.notifier-bell-sub-item.notifier-event-assigned       .notifier-bell-sub-icon { background: var(--notifier-success); border-color: var(--notifier-success); color: #fff; }
+.notifier-bell-sub-item.notifier-event-commented      .notifier-bell-sub-icon { background: var(--notifier-purple);  border-color: var(--notifier-purple);  color: #fff; }
+.notifier-bell-sub-item.notifier-event-status_changed .notifier-bell-sub-icon { background: var(--notifier-warning); border-color: var(--notifier-warning); color: #fff; }
+.notifier-bell-sub-item.notifier-event-solution       .notifier-bell-sub-icon { background: var(--notifier-teal);    border-color: var(--notifier-teal);    color: #fff; }
+.notifier-bell-sub-item.notifier-event-task_added     .notifier-bell-sub-icon { background: var(--notifier-info);    border-color: var(--notifier-info);    color: #000; }
+
+.notifier-bell-sub-body {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.notifier-bell-sub-msg {
+    font-size: 12px;
+    color: var(--notifier-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notifier-bell-sub-item.is-unread .notifier-bell-sub-msg {
+    font-weight: 600;
+}
+
 .notifier-bell-empty {
     padding: 48px 20px 60px;
     text-align: center;
@@ -519,8 +630,6 @@
     color: var(--notifier-text-muted);
 }
 
-/* Footer — houses the Settings (cog) button. Matches the TopDesk panel
-   layout from the reference screenshots. */
 .notifier-bell-panel-footer {
     display: flex;
     align-items: center;
@@ -555,9 +664,6 @@
     outline: 0;
 }
 
-/* Dark header compatibility: when GLPI renders a dark topbar the inline
-   bell icon inherits color from the parent, so usually "just works".
-   These overrides cover the explicit dark-theme classes. */
 .theme-dark .notifier-bell-btn,
 .is-dark-header .notifier-bell-btn {
     color: #fff;
@@ -568,9 +674,7 @@
     background: rgba(255, 255, 255, .15);
 }
 
-/* =====================================================================
-   Preferences modal
-   ===================================================================== */
+/* ====== Preferences modal ====== */
 
 .notifier-modal-overlay {
     position: fixed;
@@ -704,8 +808,6 @@
     border-bottom: 0;
 }
 
-/* Switch control — a pill-shaped toggle, iOS-style. Uses the native
-   checkbox under the hood for accessibility. */
 .notifier-switch {
     position: relative;
     display: inline-block;

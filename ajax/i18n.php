@@ -1,12 +1,7 @@
 <?php
 
-/**
- * Return the translated UI strings the bell widget needs.
- *
- * The JS hydrates a small `T` dictionary from this endpoint at boot and
- * uses it when building the panel, so every user-facing label respects
- * the GLPI session language.
- */
+// Hydrates the JS-side T dictionary so the bell respects the session
+// language. JS keeps English fallbacks if this fails.
 
 if (!defined('GLPI_ROOT')) {
     include(dirname(__DIR__, 3) . '/inc/includes.php');
@@ -40,4 +35,7 @@ echo json_encode([
     'cancel'               => __('Cancel', 'notifier'),
     'saved'                => __('Preferences saved', 'notifier'),
     'close'                => __('Close', 'notifier'),
+    'groupedUpdates'       => __('{n} updates', 'notifier'),
+    'expandGroup'          => __('Show all updates', 'notifier'),
+    'collapseGroup'        => __('Hide updates', 'notifier'),
 ]);

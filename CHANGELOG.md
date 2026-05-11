@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2026-05-06
+
+### Changed
+- **Unread tab is now the default**: opening the bell panel lands on the Unread tab so the first thing the user sees is "what still needs my attention". The All tab is right next to it; the user's choice still persists per-browser via `localStorage`, so anyone who explicitly switches to All will keep landing on All
+- **Stronger unread visual treatment**: unread rows now carry a soft primary-color background tint plus a bolder title alongside the existing left border, so they read as "needs attention" at a glance rather than as a thin colored stripe
+- **Notifications are batched per source object**: every Ticket / Change / Problem / ProjectTask now renders as a single row showing its most recent event, with a chevron and a "{n} updates" count when there are more. Expanding the chevron reveals the full sub-event list (status changes, comments, tasks, ...) for that object. Clicking the row body navigates to the item and marks every unread sub-event as read in one go; a per-group toggle marks the whole batch read or flips it back to unread
+- **Bell badge counts source items, not raw events**: the unread badge on the bell and the `(N)` counter in the panel header now show the number of unique source items (tickets/changes/problems/projecttasks) with at least one unread event, matching what the user sees in the batched list. Backed by a new `Notification::countUnreadGroups()` helper that does a `COUNT(DISTINCT itemtype, items_id)` over the unread rows
+
+### Fixed
+- **GLPI 11 asset path drift**: `setup.php` serves `public/notifier.{js,css}` on GLPI 11 layouts but those files had drifted from the `js/`/`css/` source since v1.0.0. The build now ships matching copies in both locations, so all the bell UX changes actually reach the browser on GLPI 11 installs
+
 ## [1.0.1] - 2026-04-29
 
 ### Fixed
