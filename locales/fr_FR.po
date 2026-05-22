@@ -81,6 +81,12 @@ msgstr "Votre groupe a été attribué"
 msgid "You have been added to a project task"
 msgstr "Vous avez été ajouté à une tâche de projet"
 
+msgid "Approval requested"
+msgstr "Approbation demandée"
+
+msgid "Approval status changed"
+msgstr "Statut d'approbation modifié"
+
 msgid "You're all caught up."
 msgstr "Vous êtes à jour."
 

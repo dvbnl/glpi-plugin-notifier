@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: notifier 1.0.2\n"
+"Project-Id-Version: notifier 1.0.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-15 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -77,6 +77,12 @@ msgid "Your group has been assigned"
 msgstr ""
 
 msgid "You have been added to a project task"
+msgstr ""
+
+msgid "Approval requested"
+msgstr ""
+
+msgid "Approval status changed"
 msgstr ""
 
 msgid "You're all caught up."

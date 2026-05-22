@@ -81,6 +81,12 @@ msgstr "Jouw groep is toegewezen"
 msgid "You have been added to a project task"
 msgstr "Je bent toegevoegd aan een projecttaak"
 
+msgid "Approval requested"
+msgstr "Goedkeuring gevraagd"
+
+msgid "Approval status changed"
+msgstr "Goedkeuringsstatus gewijzigd"
+
 msgid "You're all caught up."
 msgstr "Alles is bijgewerkt."
 
