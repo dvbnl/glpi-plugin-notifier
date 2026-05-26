@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: notifier 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-15 00:00+0000\n"
-"PO-Revision-Date: 2026-05-11 11:24+0900\n"
+"PO-Revision-Date: 2026-05-26 15:35+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ja_JP\n"
@@ -80,6 +80,12 @@ msgstr "あなたのグループが担当に"
 
 msgid "You have been added to a project task"
 msgstr "プロジェクトタスクの担当に"
+
+msgid "Approval requested"
+msgstr "承認要求"
+
+msgid "Approval status changed"
+msgstr "承認要求の状態変更"
 
 msgid "You're all caught up."
 msgstr "未読はありません。"
