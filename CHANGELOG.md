@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2026-05-21
+
+### Added
+- **Approval / validation notifications**: adding an approver to a Ticket or Change now fires a bell at the validator with a dedicated "Approval requested" event (icon: stamp). When the validator accepts or refuses, the requester gets an "Approval status changed" bell back. Group validators (GLPI 10.0.7+ `itemtype_target` = `Group`) fan out to every member; older installs that still rely on `users_id_validate` keep working through a fallback. Notifications are filed against the parent Ticket / Change so the existing per-type preferences still apply
+- **Auto mark-as-read on item view**: opening a Ticket / Change / Problem / Project task form via any route — search hit, dashboard, direct URL, not just the bell — now clears every outstanding bell for that item for the viewer. Implemented as a `pre_item_form` hook so it runs server-side regardless of how the page was reached
+
+### Fixed
+- **Missing bell for validation requests**: `TicketValidation` / `ChangeValidation` were not in the watched-types list, so adding an approver silently produced no notification. They are now wired into `item_add` / `item_update` like every other ITIL child object
+
 ## [1.0.2] - 2026-05-06
 
 ### Changed

@@ -42,6 +42,7 @@ class Notification extends CommonDBTM
     const EVENT_SOLUTION       = 'solution';
     const EVENT_STATUS_CHANGED = 'status_changed';
     const EVENT_UPDATED        = 'updated';
+    const EVENT_VALIDATION     = 'validation';
 
     public static function getTypeName($nb = 0): string
     {
@@ -237,6 +238,11 @@ class Notification extends CommonDBTM
 
         if ($type === 'ITILSolution') {
             self::handleSolution($item);
+            return;
+        }
+
+        if (in_array($type, ['TicketValidation', 'ChangeValidation'], true)) {
+            self::handleValidation($item);
             return;
         }
 
@@ -499,6 +505,121 @@ class Notification extends CommonDBTM
                 'url'      => $baseUrl,
             ]);
         }
+    }
+
+    /**
+     * Approval flow. On add: ping the validator(s). On status change:
+     * ping the requester back. The bell is filed against the parent
+     * Ticket/Change so the existing per-type preferences still apply.
+     */
+    private static function handleValidation(CommonDBTM $item): void
+    {
+        $type = $item::getType();
+        $map  = [
+            'TicketValidation' => ['parent' => 'Ticket', 'fk' => 'tickets_id'],
+            'ChangeValidation' => ['parent' => 'Change', 'fk' => 'changes_id'],
+        ];
+        if (!isset($map[$type])) {
+            return;
+        }
+
+        $parentType = $map[$type]['parent'];
+        $parentId   = (int)($item->fields[$map[$type]['fk']] ?? 0);
+        if ($parentId <= 0) {
+            return;
+        }
+
+        $parent = new $parentType();
+        if (!$parent->getFromDB($parentId)) {
+            return;
+        }
+
+        $isCreate = empty($item->updates ?? []);
+        $actor    = (int)Session::getLoginUserID();
+        $title    = self::formatItemTitle($parent);
+        $baseUrl  = $parentType::getFormURLWithID($parentId, false);
+
+        if ($isCreate) {
+            $targets = self::collectValidationTargets($item);
+            unset($targets[$actor]);
+            if (empty($targets)) {
+                return;
+            }
+
+            foreach ($targets as $uid => $channel) {
+                self::insert([
+                    'users_id' => $uid,
+                    'itemtype' => $parentType,
+                    'items_id' => $parentId,
+                    'event'    => self::EVENT_VALIDATION,
+                    'channel'  => $channel,
+                    'title'    => $title,
+                    'message'  => __('Approval requested', 'notifier'),
+                    'url'      => $baseUrl,
+                ]);
+            }
+            return;
+        }
+
+        $updates = $item->updates ?? [];
+        if (!in_array('status', $updates, true)) {
+            return;
+        }
+
+        $requester = (int)($item->fields['users_id'] ?? 0);
+        if ($requester <= 0 || $requester === $actor) {
+            return;
+        }
+
+        self::insert([
+            'users_id' => $requester,
+            'itemtype' => $parentType,
+            'items_id' => $parentId,
+            'event'    => self::EVENT_VALIDATION,
+            'channel'  => 'direct',
+            'title'    => $title,
+            'message'  => __('Approval status changed', 'notifier'),
+            'url'      => $baseUrl,
+        ]);
+    }
+
+    // GLPI 10.0.7+ uses itemtype_target/items_id_target (User|Group);
+    // older installs only have users_id_validate. Try the new field set
+    // first and fall back so this works across the supported range.
+    private static function collectValidationTargets(CommonDBTM $item): array
+    {
+        global $DB;
+
+        $targets    = [];
+        $targetType = (string)($item->fields['itemtype_target'] ?? '');
+        $targetId   = (int)($item->fields['items_id_target'] ?? 0);
+
+        if ($targetType !== '' && $targetId > 0) {
+            if ($targetType === 'User') {
+                $targets[$targetId] = 'direct';
+            } elseif ($targetType === 'Group') {
+                $rs = $DB->request([
+                    'SELECT' => ['users_id'],
+                    'FROM'   => 'glpi_groups_users',
+                    'WHERE'  => ['groups_id' => $targetId],
+                ]);
+                foreach ($rs as $row) {
+                    $uid = (int)$row['users_id'];
+                    if ($uid > 0) {
+                        $targets[$uid] = 'group';
+                    }
+                }
+            }
+        }
+
+        if (empty($targets)) {
+            $legacy = (int)($item->fields['users_id_validate'] ?? 0);
+            if ($legacy > 0) {
+                $targets[$legacy] = 'direct';
+            }
+        }
+
+        return $targets;
     }
 
     // Only ASSIGN (CommonITILActor::ASSIGN = 2) gets a bell — requesters
@@ -972,6 +1093,50 @@ class Notification extends CommonDBTM
             'glpi_plugin_notifier_notifications',
             ['is_read' => 1, 'date_mod' => date('Y-m-d H:i:s')],
             ['users_id' => $users_id, 'is_read' => 0]
+        );
+    }
+
+    /**
+     * PLUGIN_HOOKS pre_item_form — flips every unread bell for
+     * (session user, this item) to read. Fires on any route that
+     * renders the form, so opening a ticket from search / dashboard /
+     * direct URL clears its bells just like clicking through the bell.
+     */
+    public static function markItemAsSeen($params): void
+    {
+        global $DB;
+
+        if (!is_array($params) || !isset($params['item']) || !is_object($params['item'])) {
+            return;
+        }
+        $item = $params['item'];
+        $type = $item::getType();
+
+        if (!in_array($type, ['Ticket', 'Change', 'Problem', 'ProjectTask'], true)) {
+            return;
+        }
+
+        $id = (int)($item->fields['id'] ?? 0);
+        if ($id <= 0) {
+            return;
+        }
+
+        $users_id = (int)Session::getLoginUserID();
+        if ($users_id <= 0) {
+            return;
+        }
+
+        self::ensureNotificationsSchema();
+
+        $DB->update(
+            'glpi_plugin_notifier_notifications',
+            ['is_read' => 1, 'date_mod' => date('Y-m-d H:i:s')],
+            [
+                'users_id' => $users_id,
+                'itemtype' => $type,
+                'items_id' => $id,
+                'is_read'  => 0,
+            ]
         );
     }
 

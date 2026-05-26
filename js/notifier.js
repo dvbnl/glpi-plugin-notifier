@@ -396,6 +396,7 @@
             case 'task_added':     return 'fa-list-check';
             case 'created':        return 'fa-plus';
             case 'updated':        return 'fa-pen';
+            case 'validation':     return 'fa-stamp';
             default:               return 'fa-bell';
         }
     }

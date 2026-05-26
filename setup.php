@@ -30,7 +30,7 @@
 
 use Glpi\Plugin\Hooks;
 
-define('PLUGIN_NOTIFIER_VERSION', '1.0.2');
+define('PLUGIN_NOTIFIER_VERSION', '1.0.3');
 define('PLUGIN_NOTIFIER_MIN_GLPI', '10.0.0');
 define('PLUGIN_NOTIFIER_MAX_GLPI', '11.99.99');
 
@@ -109,6 +109,8 @@ function plugin_init_notifier(): void
         'Change_Group',
         'Group_Problem',
         'ProjectTaskTeam',
+        'TicketValidation',
+        'ChangeValidation',
     ];
 
     $dispatch = ['GlpiPlugin\Notifier\Notification', 'handleItemEvent'];
@@ -123,4 +125,9 @@ function plugin_init_notifier(): void
     foreach ($watched_types as $type) {
         $PLUGIN_HOOKS[Hooks::ITEM_PURGE]['notifier'][$type] = $cleanup;
     }
+
+    // Opening the item's form (any route — bell click, search hit, direct
+    // URL) clears its outstanding bells for the viewer.
+    $PLUGIN_HOOKS[Hooks::PRE_ITEM_FORM]['notifier'] =
+        ['GlpiPlugin\Notifier\Notification', 'markItemAsSeen'];
 }

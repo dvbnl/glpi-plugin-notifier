@@ -397,6 +397,7 @@
 .notifier-bell-item.notifier-event-status_changed .notifier-bell-item-icon { background: var(--notifier-warning); color: #fff; }
 .notifier-bell-item.notifier-event-solution       .notifier-bell-item-icon { background: var(--notifier-teal);    color: #fff; }
 .notifier-bell-item.notifier-event-task_added     .notifier-bell-item-icon { background: var(--notifier-info);    color: #000; }
+.notifier-bell-item.notifier-event-validation     .notifier-bell-item-icon { background: var(--notifier-warning); color: #fff; }
 
 .notifier-bell-item-body {
     min-width: 0;
@@ -575,6 +576,7 @@
 .notifier-bell-sub-item.notifier-event-status_changed .notifier-bell-sub-icon { background: var(--notifier-warning); border-color: var(--notifier-warning); color: #fff; }
 .notifier-bell-sub-item.notifier-event-solution       .notifier-bell-sub-icon { background: var(--notifier-teal);    border-color: var(--notifier-teal);    color: #fff; }
 .notifier-bell-sub-item.notifier-event-task_added     .notifier-bell-sub-icon { background: var(--notifier-info);    border-color: var(--notifier-info);    color: #000; }
+.notifier-bell-sub-item.notifier-event-validation     .notifier-bell-sub-icon { background: var(--notifier-warning); border-color: var(--notifier-warning); color: #fff; }
 
 .notifier-bell-sub-body {
     min-width: 0;
