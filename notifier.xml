@@ -9,6 +9,7 @@
             <nl><![CDATA[In-app notificatiebel voor GLPI technici — elke actie die jou raakt (ticket, wijziging, probleem, projecttaak) verschijnt in een dropdown naast je avatar]]></nl>
             <fr><![CDATA[Cloche de notifications in-app pour les techniciens GLPI — chaque action qui vous concerne (ticket, changement, probleme, tache de projet) apparait dans un menu deroulant a cote de votre avatar]]></fr>
             <es><![CDATA[Campana de notificaciones in-app para tecnicos GLPI — cada accion que te afecta (ticket, cambio, problema, tarea de proyecto) aparece en un menu desplegable junto a tu avatar]]></es>
+            <ja><![CDATA[GLPI 技術者のためのアプリ内通知ベル — あなたに関わるチケット・変更・問題・プロジェクトタスクについて、ベルでお知らせします。]]></ja>
         </short>
         <long>
             <en><![CDATA[Notifier adds a real-time notification bell to GLPI's top header, right next to the user avatar.
@@ -26,7 +27,23 @@ Features:
 - 30 second polling, dedup window to prevent bell spam
 - Central interface only — self-service is not touched
 - Full GLPI rights integration (READ / UPDATE / PURGE per profile)
-- Multi-language support: English, Dutch, French, Spanish]]></en>
+- Multi-language support: English, Dutch, French, Spanish, Japanese]]></en>
+            <ja><![CDATA[通知ベルは、リアルタイムの通知機能を追加します。
+
+機能 :
+- ベルの未読バッジとドロップダウン パネル
+- あなたが技術者として影響を受けるすべての操作をリアルタイムに反映 : 
+  - チケット・変更・問題の、作成・担当・コメントの追加・状態の変更・解決の提案
+  - あなたがかかわるアイテムについての新たな ITIL タスクや回答
+  - プロジェクトタスクの作成・更新またはチームへの割り当て
+  - グループが担当になった際は、全メンバーへ
+- １クリックで元のアイテムに移動でき、自動で既読に
+- ドロップダウンのヘッダーで「すべてを既読に」の操作可
+- 自動クリーンアップ : 削除されたアイテムについての通知は自動削除
+- 30秒ごとのポーリング、重複ウィンドウでベルのスパムを防止
+- センターインターフェースのみ — セルフサービスでは非表示
+- GLPI の権限に全面的に対応 (プロファイルごとの表示・更新・抹消)
+- 多言語サポート : 英語、ドイツ語、フランス語、スペイン語、日本語]]></ja>
         </long>
     </description>
     <homepage>https://github.com/dvbnl/glpi-plugin-notifier</homepage>
@@ -63,6 +80,7 @@ Features:
         <lang>nl_NL</lang>
         <lang>fr_FR</lang>
         <lang>es_ES</lang>
+        <lang>ja_JP</lang>
     </langs>
     <license><![CDATA[GPL v3+]]></license>
     <tags>
