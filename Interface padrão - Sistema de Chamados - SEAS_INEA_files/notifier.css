@@ -45,83 +45,6 @@
     margin-right: 0;
 }
 
-/* Header mount: injected inline into GLPI's navbar. Button blends into
-   the Tabler header chrome, panel opens downward as a dropdown. */
-.notifier-bell-wrap.notifier-bell-header {
-    display: inline-flex;
-    align-items: center;
-    margin: 0 6px 0 2px;
-    position: relative;
-}
-
-.notifier-bell-wrap.notifier-bell-header .notifier-bell-btn {
-    width: auto;
-    height: auto;
-    padding: 8px 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: 0;
-    border-radius: 6px;
-    color: var(--tblr-navbar-color, #6c7a91);
-    font-size: 20px;
-    box-shadow: none;
-    transition: background-color .12s ease, color .12s ease;
-}
-
-.notifier-bell-wrap.notifier-bell-header .notifier-bell-btn:hover,
-.notifier-bell-wrap.notifier-bell-header .notifier-bell-btn:focus-visible {
-    background: rgba(0, 0, 0, .06);
-    color: var(--tblr-navbar-active-color, #1d273b);
-    transform: none;
-    box-shadow: none;
-    outline: 0;
-}
-
-.notifier-bell-wrap.notifier-bell-header .notifier-bell-badge {
-    top: 3px;
-    right: 3px;
-    min-width: 16px;
-    height: 16px;
-    line-height: 16px;
-    font-size: 9px;
-    box-shadow: 0 0 0 2px var(--tblr-bg-surface, #fff);
-}
-
-/* Panel opens downward in header mode (dropdown-style) */
-.notifier-bell-wrap.notifier-bell-header .notifier-bell-panel {
-    top: calc(100% + 4px);
-    bottom: auto;
-    right: 0;
-    left: auto;
-    transform-origin: top right;
-}
-
-/* Hide restore button in header mode — no off-screen collapse needed */
-.notifier-bell-wrap.notifier-bell-header .notifier-bell-restore {
-    display: none !important;
-}
-
-/* Dark / is-dark-header support for header mode */
-.theme-dark .notifier-bell-wrap.notifier-bell-header .notifier-bell-btn,
-.is-dark-header .notifier-bell-wrap.notifier-bell-header .notifier-bell-btn {
-    color: rgba(255, 255, 255, .7);
-}
-
-.theme-dark .notifier-bell-wrap.notifier-bell-header .notifier-bell-btn:hover,
-.is-dark-header .notifier-bell-wrap.notifier-bell-header .notifier-bell-btn:hover,
-.theme-dark .notifier-bell-wrap.notifier-bell-header .notifier-bell-btn:focus-visible,
-.is-dark-header .notifier-bell-wrap.notifier-bell-header .notifier-bell-btn:focus-visible {
-    background: rgba(255, 255, 255, .12);
-    color: #fff;
-}
-
-.theme-dark .notifier-bell-wrap.notifier-bell-header .notifier-bell-badge,
-.is-dark-header .notifier-bell-wrap.notifier-bell-header .notifier-bell-badge {
-    box-shadow: 0 0 0 2px var(--tblr-dark, #1d273b);
-}
-
 .notifier-bell-wrap.notifier-bell-floating .notifier-bell-btn {
     width: 56px;
     height: 56px;
@@ -474,7 +397,6 @@
 .notifier-bell-item.notifier-event-status_changed .notifier-bell-item-icon { background: var(--notifier-warning); color: #fff; }
 .notifier-bell-item.notifier-event-solution       .notifier-bell-item-icon { background: var(--notifier-teal);    color: #fff; }
 .notifier-bell-item.notifier-event-task_added     .notifier-bell-item-icon { background: var(--notifier-info);    color: #000; }
-.notifier-bell-item.notifier-event-validation     .notifier-bell-item-icon { background: var(--notifier-warning); color: #fff; }
 
 .notifier-bell-item-body {
     min-width: 0;
@@ -653,7 +575,6 @@
 .notifier-bell-sub-item.notifier-event-status_changed .notifier-bell-sub-icon { background: var(--notifier-warning); border-color: var(--notifier-warning); color: #fff; }
 .notifier-bell-sub-item.notifier-event-solution       .notifier-bell-sub-icon { background: var(--notifier-teal);    border-color: var(--notifier-teal);    color: #fff; }
 .notifier-bell-sub-item.notifier-event-task_added     .notifier-bell-sub-icon { background: var(--notifier-info);    border-color: var(--notifier-info);    color: #000; }
-.notifier-bell-sub-item.notifier-event-validation     .notifier-bell-sub-icon { background: var(--notifier-warning); border-color: var(--notifier-warning); color: #fff; }
 
 .notifier-bell-sub-body {
     min-width: 0;

@@ -1,0 +1,1115 @@
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme-dark="1"] {
+  --tblr-dark: #000;
+  --tblr-light: #e6e6e6;
+  --tblr-info: #5885c0;
+  --tblr-body-bg: #000;
+  --tblr-body-color: #e6e6e6;
+  --tblr-body-color-rgb: 230, 230, 230;
+  --tblr-bg-surface: color-mix(in srgb, var(--tblr-body-bg), black 2%);
+  --tblr-border-color: color-mix(in srgb, var(--tblr-body-bg), white 33.33%);
+  --tblr-gray-100: var(--tblr-dark);
+  --tblr-gray-200: color-mix(in srgb, var(--tblr-dark), var(--tblr-light) 2%);
+  --tblr-gray-300: color-mix(in srgb, var(--tblr-dark), var(--tblr-light) 6%);
+  --tblr-gray-400: color-mix(in srgb, var(--tblr-dark), var(--tblr-light) 12%);
+  --tblr-gray-500: color-mix(in srgb, var(--tblr-dark), var(--tblr-light) 22%);
+  --tblr-gray-600: color-mix(in srgb, var(--tblr-dark), var(--tblr-light) 40%);
+  --tblr-gray-700: color-mix(in srgb, var(--tblr-dark), var(--tblr-light) 64%);
+  --tblr-gray-800: color-mix(in srgb, var(--tblr-dark), var(--tblr-light) 84%);
+  --tblr-gray-900: var(--tblr-light);
+  --tblr-gray-50: var(--tblr-gray-300);
+  --glpi-tabs-active-bg: color-mix(in srgb, var(--tblr-bg-surface), white 10%);
+  --glpi-tabs-border-color: transparent;
+  --glpi-scrollbar-thumb-color: color-mix(in srgb, var(--tblr-secondary), transparent 75%);
+  --glpi-timeline-itil-content-bg: #212221d3;
+  --glpi-timeline-itil-content-fg: #85bd81;
+  --glpi-timeline-itil-content-border-color: #1d201db4;
+  --glpi-timeline-fup-bg: #222;
+  --glpi-timeline-fup-fg: #acacac;
+  --glpi-timeline-fup-border-color: #3b3b3b;
+  --glpi-timeline-task-bg: #2722172f;
+  --glpi-timeline-task-fg: #ccb686;
+  --glpi-timeline-task-border-color: #363532;
+  --glpi-timeline-solution-bg: #3a4d55;
+  --glpi-timeline-solution-fg: #89bfd3;
+  --glpi-timeline-solution-border-color: #435963;
+  --glpi-timeline-document-bg: #2b4137;
+  --glpi-timeline-document-fg: #68b997;
+  --glpi-timeline-badge-bg: rgb(104, 104, 104, 15%);
+  --glpi-timeline-badge-fg: rgb(236, 236, 236, 80%);
+  --glpi-badge-bg: color-mix(in srgb, var(--tblr-link-color), var(--tblr-dark) 85%);
+  --glpi-illustrations-background: rgb(204, 204, 204);
+  --glpi-illustrations-primary: hsl(from var(--tblr-primary) h s 65);
+  --glpi-illustrations-header-dark: hsl(from var(--glpi-illustrations-background) h s 30);
+  --glpi-illustrations-header-light: hsl(from var(--glpi-illustrations-background) h s 50);
+}
+:root[data-glpi-theme-dark="1"] .navbar-nav.user-menu .bg-red-lt {
+  background-color: rgba(214, 57, 57, 0.2) !important;
+}
+:root[data-glpi-theme-dark="1"] .form-check-input:not(:checked),
+:root[data-glpi-theme-dark="1"] .form-select,
+:root[data-glpi-theme-dark="1"] .form-file-text,
+:root[data-glpi-theme-dark="1"] .form-control,
+:root[data-glpi-theme-dark="1"] .form-selectgroup-label,
+:root[data-glpi-theme-dark="1"] .form-selectgroup-check,
+:root[data-glpi-theme-dark="1"] .form-imagecheck-figure::before {
+  border-color: var(--tblr-border-color);
+}
+:root[data-glpi-theme-dark="1"] .card {
+  border: 1px solid var(--tblr-border-color);
+}
+:root[data-glpi-theme-dark="1"] input[type=color] {
+  background-color: transparent;
+}
+:root[data-glpi-theme-dark="1"] .table-danger {
+  --tblr-table-bg: #642b2b;
+  --tblr-table-striped-bg: #642b2b;
+  --tblr-table-striped-color: var(--tblr-light);
+  --tblr-table-active-bg: #642b2b;
+  --tblr-table-active-color: var(--tblr-light);
+  --tblr-table-hover-bg: #642b2b;
+  --tblr-table-hover-color: var(--tblr-light);
+  color: var(--tblr-light);
+  border-color: #6d000a;
+}
+:root[data-glpi-theme-dark="1"] .search_page .search-container .search-card .search-results.deleted-results td {
+  color: var(--tblr-light);
+}
+:root[data-glpi-theme-dark="1"] .navbar-collapsed #navbar-menu .nav-item .nav-link + .dropdown-menu {
+  background-color: var(--tblr-bg-surface) !important;
+  color: var(--glpi-mainmenu-fg) !important;
+}
+:root[data-glpi-theme-dark="1"] .page-anonymous .glpi-logo {
+  --logo: var(--glpi-logo-light-login) !important;
+}
+:root[data-glpi-theme-dark="1"] .qtip-bootstrap,
+:root[data-glpi-theme-dark="1"] .popover .popover-body {
+  background-color: var(--tblr-bg-surface) !important;
+  color: var(--tblr-light) !important;
+}
+:root[data-glpi-theme-dark="1"] .popover .popover-arrow::after {
+  border-top-color: var(--tblr-bg-surface) !important;
+}
+:root[data-glpi-theme-dark="1"] iframe.tox-edit-area__iframe {
+  background-color: var(--tblr-bg-surface) !important;
+}
+:root[data-glpi-theme-dark="1"] .search_page .search-container .search-card .search-header .search-controls .btn-active-search {
+  background-color: rgba(207, 245, 209, 0.1607843137);
+  color: #cff5d1;
+}
+:root[data-glpi-theme-dark="1"] .search_page .search-container .search-card .search-header .search-controls .btn-active-sort {
+  background-color: rgba(255, 224, 204, 0.1803921569);
+  color: #ffe0cc;
+}
+:root[data-glpi-theme-dark="1"] .avatar {
+  color: var(--tblr-dark);
+}
+:root[data-glpi-theme-dark="1"] .list-group {
+  --tblr-list-group-action-active-bg: rgb(var(--tblr-secondary-rgb), 0.5);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=aerialgreen] {
+  --tblr-primary-rgb: 142, 197, 71;
+  --tblr-secondary: #768363;
+  --tblr-secondary-fg: #fcfcfc;
+  --tblr-link-color-rgb: 69, 148, 54;
+  --glpi-mainmenu-bg: #459436;
+  --glpi-helpdesk-header: hsl(111deg, 41%, 85%);
+  --glpi-mainmenu-fg: #f4f6fa;
+  --glpi-palette-color-1: #459436;
+  --glpi-palette-color-2: #365731;
+  --glpi-palette-color-3: #8ec547;
+  --glpi-palette-color-4: #fec95c;
+  --glpi-illustrations-gradient-1: hsl(110deg, 47%, 92%);
+  --glpi-illustrations-gradient-2: hsl(110deg, 47%, 72%);
+  --glpi-illustrations-gradient-3: hsl(110deg, 47%, 45%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=auror] {
+  --glpi-palette-color-1: #1b2f62;
+  --glpi-palette-color-2: #fff;
+  --glpi-palette-color-3: #3a5693;
+  --glpi-palette-color-4: #fec95c;
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=auror_dark] {
+  --tblr-dark: #232e3c;
+  --tblr-light: #9ca8c0;
+  --tblr-body-bg: #1f2936;
+  --tblr-bg-surface: #232e3c;
+  --tblr-body-color: #9ca8c0;
+  --tblr-primary-rgb: 254, 201, 92;
+  --tblr-primary-fg: #644e21;
+  --tblr-secondary: #b0bbd4;
+  --tblr-secondary-fg: #262d3d;
+  --tblr-link-color-rgb: 182, 195, 224;
+  --tblr-muted: #757d91;
+  --tblr-badge-bg: var(--tblr-light);
+  --tblr-badge-color: var(--tblr-dark);
+  --glpi-form-header-fg: #6ba8f3;
+  --glpi-form-header-border-color: transparent;
+  --glpi-mainmenu-bg: #232e3c;
+  --glpi-mainmenu-fg: #ffffffb3;
+  --glpi-helpdesk-header: hsl(213.9deg, 27.1%, 30.7%);
+  --glpi-helpdesk-tiles-section-bg: hsl(213.9deg, 27.1%, 25.7%);
+  --glpi-helpdesk-tabs-section-bg: hsl(213.9deg, 27.1%, 20.7%);
+  --glpi-tabs-bg: #1d2531;
+  --glpi-tabs-fg: var(--tblr-light);
+  --glpi-tabs-border-color: transparent;
+  --glpi-tabs-active-bg: #2a3a4f;
+  --glpi-tabs-active-fg: #d8dfe7;
+  --glpi-tabs-active-border-color: transparent;
+  --glpi-itil-secondary-bg: #1d2531;
+  --glpi-timeline-fup-bg: #1c2430;
+  --glpi-timeline-fup-fg: #8892a8;
+  --glpi-timeline-fup-border: #2f3d50;
+  --glpi-palette-color-1: #1b2f62;
+  --glpi-palette-color-2: #131425;
+  --glpi-palette-color-3: #3a5693;
+  --glpi-palette-color-4: #fec95c;
+  --glpi-illustrations-gradient-1: hsl(213.9deg, 27.1%, 70%);
+  --glpi-illustrations-gradient-2: hsl(213.9deg, 27.1%, 40%);
+  --glpi-illustrations-gradient-3: hsl(213.9deg, 27.1%, 20%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=automn] {
+  --tblr-primary-rgb: 242, 178, 101;
+  --tblr-primary-fg: #8b4d34;
+  --tblr-secondary: #757575;
+  --tblr-secondary-fg: #f4f6fa;
+  --tblr-link-color-rgb: 192, 111, 61;
+  --glpi-mainmenu-bg: #8b4d34;
+  --glpi-helpdesk-header: hsl(18deg, 41%, 85%);
+  --glpi-mainmenu-fg: #f4f6fa;
+  --glpi-palette-color-1: #8b4d34;
+  --glpi-palette-color-2: #58372e;
+  --glpi-palette-color-3: #f2b265;
+  --glpi-palette-color-4: #c06f3d;
+  --glpi-illustrations-gradient-1: hsl(17deg, 46%, 92%);
+  --glpi-illustrations-gradient-2: hsl(17deg, 46%, 72%);
+  --glpi-illustrations-gradient-3: hsl(17deg, 46%, 45%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=classic] {
+  --tblr-primary-rgb: 242, 178, 101;
+  --tblr-primary-fg: #8f5a0a;
+  --tblr-secondary: #888373;
+  --tblr-secondary-fg: #8f5a0a;
+  --tblr-link-color-rgb: 101, 153, 0;
+  --glpi-mainmenu-bg: #98a458;
+  --glpi-helpdesk-header: hsl(70deg, 26%, 85%);
+  --glpi-mainmenu-fg: #000;
+  --glpi-palette-color-1: #E1D39E;
+  --glpi-palette-color-2: #877C52;
+  --glpi-palette-color-3: #C0CC7B;
+  --glpi-palette-color-4: #FEC95C;
+  --glpi-illustrations-gradient-1: hsl(69deg, 26%, 92%);
+  --glpi-illustrations-gradient-2: hsl(69deg, 26%, 62%);
+  --glpi-illustrations-gradient-3: hsl(69deg, 26%, 45%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=clockworkorange] {
+  --tblr-primary-rgb: 252, 121, 98;
+  --tblr-primary-fg: #fff;
+  --tblr-link-color-rgb: 179, 56, 34;
+  --glpi-mainmenu-bg: #b2341c;
+  --glpi-helpdesk-header: hsl(11deg, 65%, 85%);
+  --glpi-mainmenu-fg: #fce7e4;
+  --glpi-palette-color-1: #ff5131;
+  --glpi-palette-color-2: #b2341c;
+  --glpi-palette-color-3: #ff7c64;
+  --glpi-palette-color-4: #fff;
+  --glpi-illustrations-gradient-1: hsl(10deg, 73%, 92%);
+  --glpi-illustrations-gradient-2: hsl(10deg, 73%, 62%);
+  --glpi-illustrations-gradient-3: hsl(10deg, 73%, 45%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=dark] {
+  --tblr-primary-rgb: 88, 89, 87;
+  --tblr-primary-fg: #fff;
+  --tblr-link-color-rgb: 22, 21, 20;
+  --glpi-mainmenu-bg: #161514;
+  --glpi-helpdesk-header: hsl(31deg, 5%, 75%);
+  --glpi-mainmenu-fg: #fff;
+  --glpi-palette-color-1: #161514;
+  --glpi-palette-color-2: #fff;
+  --glpi-palette-color-3: #585957;
+  --glpi-palette-color-4: #3f403e;
+  --glpi-illustrations-gradient-1: hsl(30deg, 5%, 92%);
+  --glpi-illustrations-gradient-2: hsl(30deg, 5%, 62%);
+  --glpi-illustrations-gradient-3: hsl(30deg, 5%, 45%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=darker] {
+  --tblr-dark: #242323;
+  --tblr-light: #aaa;
+  --tblr-body-bg: #1f1e1e;
+  --tblr-body-color: #aaa;
+  --tblr-bg-surface: #242323;
+  --tblr-primary-rgb: 107, 107, 107;
+  --tblr-primary-fg: #aaa;
+  --tblr-secondary: #737572;
+  --tblr-secondary-fg: #f3f3f3;
+  --tblr-link-color-rgb: 136, 136, 136;
+  --tblr-link-hover-color-rgb: 200, 200, 200;
+  --tblr-code-color: #B4B4B4;
+  --tblr-muted: #aaa;
+  --tblr-badge-bg: var(--tblr-light);
+  --tblr-badge-color: var(--tblr-dark);
+  --glpi-mainmenu-bg: #242323;
+  --glpi-helpdesk-header: #1f1e1e;
+  --glpi-helpdesk-tiles-section-bg: hsl(0deg, 1.6%, 20%);
+  --glpi-helpdesk-tabs-section-bg: hsl(0deg, 1.6%, 10%);
+  --glpi-illustrations-header-light: hsl(40deg, 5%, 4%);
+  --glpi-mainmenu-fg: #f4f6fa;
+  --glpi-form-header-border-color: transparent;
+  --glpi-form-header-fg: var(--tblr-light);
+  --glpi-tabs-bg: #222121;
+  --glpi-tabs-fg: var(--tblr-light);
+  --glpi-tabs-border-color: transparent;
+  --glpi-tabs-active-bg: #3a3938;
+  --glpi-tabs-active-fg: var(--tblr-muted);
+  --glpi-tabs-active-border-color: transparent;
+  --glpi-itil-secondary-bg: #222121;
+  --glpi-palette-color-1: #161514;
+  --glpi-palette-color-2: #131e21;
+  --glpi-palette-color-3: #585957;
+  --glpi-palette-color-4: #3f403e;
+  --glpi-illustrations-gradient-1: hsl(0deg, 1%, 70%);
+  --glpi-illustrations-gradient-2: hsl(0deg, 1%, 35%);
+  --glpi-illustrations-gradient-3: hsl(0deg, 1%, 20%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=flood] {
+  --tblr-primary-rgb: 244, 212, 173;
+  --tblr-secondary: #757575;
+  --tblr-link-color-rgb: 0, 101, 115;
+  --tblr-badge-bg: #d0d9f0;
+  --tblr-badge-color: rgb(58, 73, 102);
+  --glpi-mainmenu-bg: #006573;
+  --glpi-helpdesk-header: hsl(188deg, 40%, 61%);
+  --glpi-mainmenu-fg: #f4f6fa;
+  --glpi-search-bg: #fcf7f1;
+  --glpi-search-fg: #756d61;
+  --glpi-palette-color-1: #006573;
+  --glpi-palette-color-2: #005572;
+  --glpi-palette-color-3: #81beaa;
+  --glpi-palette-color-4: #f4d4ad;
+  --glpi-illustrations-gradient-1: hsl(187deg, 50%, 92%);
+  --glpi-illustrations-gradient-2: hsl(187deg, 40%, 70%);
+  --glpi-illustrations-gradient-3: hsl(187deg, 50%, 35%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=greenflat] {
+  --tblr-primary-rgb: 254, 201, 92;
+  --tblr-link-color-rgb: 0, 122, 88;
+  --glpi-mainmenu-bg: #09a071;
+  --glpi-helpdesk-header: hsl(162deg, 40%, 85%);
+  --glpi-mainmenu-fg: #fff;
+  --glpi-palette-color-1: #09a071;
+  --glpi-palette-color-2: #004630;
+  --glpi-palette-color-3: #007a58;
+  --glpi-palette-color-4: #fec95c;
+  --glpi-illustrations-gradient-1: hsl(161deg, 40%, 92%);
+  --glpi-illustrations-gradient-2: hsl(161deg, 40%, 65%);
+  --glpi-illustrations-gradient-3: hsl(161deg, 40%, 38%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=hipster] {
+  --tblr-primary-rgb: 255, 210, 202;
+  --tblr-primary-fg: #d6665a;
+  --tblr-secondary: #d6665a;
+  --tblr-secondary-fg: #fff;
+  --tblr-link-color-rgb: 117, 164, 139;
+  --glpi-mainmenu-bg: #d6665a;
+  --glpi-helpdesk-header: hsl(7deg, 54%, 85%);
+  --glpi-mainmenu-fg: #ffd2ca;
+  --glpi-palette-color-1: #dc9b74;
+  --glpi-palette-color-2: #75a48b;
+  --glpi-palette-color-3: #42282e;
+  --glpi-palette-color-4: #d6665a;
+  --glpi-illustrations-gradient-1: hsl(6deg, 60%, 92%);
+  --glpi-illustrations-gradient-2: hsl(6deg, 60%, 65%);
+  --glpi-illustrations-gradient-3: hsl(6deg, 60%, 40%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=icecream] {
+  --tblr-primary-rgb: 213, 79, 88;
+  --tblr-primary-fg: #f3edd3;
+  --tblr-secondary: #113f59;
+  --tblr-secondary-fg: #a9e3e4;
+  --tblr-link-color-rgb: 20, 146, 148;
+  --glpi-mainmenu-bg: #113f59;
+  --glpi-helpdesk-header: hsl(203deg, 63%, 85%);
+  --glpi-mainmenu-fg: #f3edd3;
+  --glpi-palette-color-1: #113f59;
+  --glpi-palette-color-2: #19bec0;
+  --glpi-palette-color-3: #f3edd3;
+  --glpi-palette-color-4: #d54f58;
+  --glpi-illustrations-gradient-1: hsl(202deg, 68%, 92%);
+  --glpi-illustrations-gradient-2: hsl(202deg, 68%, 72%);
+  --glpi-illustrations-gradient-3: hsl(202deg, 68%, 40%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=lightblue] {
+  --tblr-primary-rgb: 200, 234, 253;
+  --tblr-secondary: #656d77;
+  --tblr-link-color-rgb: 44, 115, 167;
+  --tblr-badge-bg: #d0d9f0;
+  --tblr-badge-color: rgb(58, 73, 102);
+  --glpi-mainmenu-bg: #1a7ab2;
+  --glpi-helpdesk-header: hsl(203deg, 70%, 85%);
+  --glpi-mainmenu-fg: #f4f6fa;
+  --glpi-palette-color-1: #1a7ab2;
+  --glpi-palette-color-2: #41b1ff;
+  --glpi-palette-color-3: #7cc7f1;
+  --glpi-palette-color-4: #fff;
+  --glpi-illustrations-gradient-1: hsl(202deg, 75%, 92%);
+  --glpi-illustrations-gradient-2: hsl(202deg, 75%, 72%);
+  --glpi-illustrations-gradient-3: hsl(202deg, 75%, 40%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=midnight] {
+  --tblr-dark: #000;
+  --tblr-light: #e6e6e6;
+  --tblr-body-bg: #000;
+  --tblr-primary-rgb: 182, 195, 224;
+  --tblr-primary-fg: #232e3c;
+  --tblr-secondary: #b0bbd4;
+  --tblr-secondary-fg: #262d3d;
+  --tblr-link-color-rgb: 200, 200, 200;
+  --tblr-link-hover-color-rgb: 225, 225, 225;
+  --tblr-code-color: #B4B4B4;
+  --tblr-muted: #c6cad2;
+  --tblr-muted-rgb: 198, 202, 210;
+  --tblr-badge-bg: var(--tblr-light);
+  --tblr-badge-color: var(--tblr-dark);
+  --glpi-mainmenu-bg: var(--tblr-body-bg);
+  --glpi-helpdesk-header: #1f1e1e;
+  --glpi-helpdesk-tiles-section-bg: hsl(0deg, 1.6%, 4%);
+  --glpi-helpdesk-tabs-section-bg: #000;
+  --glpi-illustrations-header-light: hsl(40deg, 5%, 4%);
+  --glpi-mainmenu-fg: var(--tblr-body-color);
+  --glpi-form-header-fg: #6ba8f3;
+  --glpi-form-header-border-color: transparent;
+  --glpi-tabs-bg: #1a1a1a;
+  --glpi-tabs-fg: var(--tblr-light);
+  --glpi-tabs-border-color: transparent;
+  --glpi-tabs-active-bg: #3a3938;
+  --glpi-tabs-active-fg: var(--tblr-muted);
+  --glpi-tabs-active-border-color: transparent;
+  --glpi-itil-secondary-bg: #1d2531;
+  --glpi-timeline-fup-bg: #1c2430;
+  --glpi-timeline-fup-fg: #8892a8;
+  --glpi-timeline-fup-border: #2f3d50;
+  --glpi-palette-color-1: #000;
+  --glpi-palette-color-2: #1b1b1b;
+  --glpi-palette-color-3: #858585;
+  --glpi-palette-color-4: #c2c2c2;
+  --glpi-illustrations-gradient-1: hsl(0deg, 1.6%, 70%);
+  --glpi-illustrations-gradient-2: hsl(0deg, 1.6%, 40%);
+  --glpi-illustrations-gradient-3: hsl(0deg, 1.6%, 20%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=premiumred] {
+  --tblr-primary-rgb: 251, 99, 86;
+  --tblr-primary-fg: #fff;
+  --tblr-link-color-rgb: 200, 50, 38;
+  --glpi-mainmenu-bg: #a2291f;
+  --glpi-helpdesk-header: hsl(6deg, 63%, 85%);
+  --glpi-mainmenu-fg: #f3eae9;
+  --glpi-palette-color-1: #a2291f;
+  --glpi-palette-color-2: #621913;
+  --glpi-palette-color-3: #e2392b;
+  --glpi-palette-color-4: #c83226;
+  --glpi-illustrations-gradient-1: hsl(5deg, 68%, 92%);
+  --glpi-illustrations-gradient-2: hsl(5deg, 68%, 72%);
+  --glpi-illustrations-gradient-3: hsl(5deg, 68%, 42%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=purplehaze] {
+  --tblr-primary-rgb: 115, 110, 185;
+  --tblr-primary-fg: #fff;
+  --tblr-link-color-rgb: 86, 75, 127;
+  --glpi-mainmenu-bg: #353166;
+  --glpi-helpdesk-header: hsl(246deg, 58%, 85%);
+  --glpi-mainmenu-fg: #fff;
+  --glpi-palette-color-1: #363268;
+  --glpi-palette-color-2: #564b7f;
+  --glpi-palette-color-3: #8783c2;
+  --glpi-palette-color-4: #fff;
+  --glpi-illustrations-gradient-1: hsl(245deg, 58%, 92%);
+  --glpi-illustrations-gradient-2: hsl(245deg, 58%, 72%);
+  --glpi-illustrations-gradient-3: hsl(245deg, 58%, 45%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=teclib] {
+  --tblr-primary-rgb: 188, 218, 26;
+  --tblr-primary-fg: #353b17;
+  --tblr-link-color-rgb: 169, 88, 185;
+  --glpi-mainmenu-bg: #a958b9;
+  --glpi-helpdesk-header: hsl(291deg, 30%, 85%);
+  --glpi-mainmenu-fg: #fff;
+  --glpi-palette-color-1: #ba77c8;
+  --glpi-palette-color-2: #8e21a1;
+  --glpi-palette-color-3: #f1f1f2;
+  --glpi-palette-color-4: #bcda1a;
+  --glpi-illustrations-gradient-1: hsl(290deg, 38%, 92%);
+  --glpi-illustrations-gradient-2: hsl(290deg, 38%, 72%);
+  --glpi-illustrations-gradient-3: hsl(290deg, 38%, 42%);
+}
+
+/*!
+ * ---------------------------------------------------------------------
+ *
+ * GLPI - Gestionnaire Libre de Parc Informatique
+ *
+ * http://glpi-project.org
+ *
+ * @copyright 2015-2026 Teclib' and contributors.
+ * @copyright 2003-2014 by the INDEPNET Development Team.
+ * @licence   https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * ---------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of GLPI.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ---------------------------------------------------------------------
+ */
+:root[data-glpi-theme=vintage] {
+  --tblr-primary-rgb: 249, 32, 29;
+  --tblr-primary-fg: #fff;
+  --tblr-link-color-rgb: 191, 8, 5;
+  --glpi-mainmenu-bg: #064260;
+  --glpi-helpdesk-header: hsl(201deg, 83%, 85%);
+  --glpi-mainmenu-fg: #fff;
+  --glpi-palette-color-1: #064260;
+  --glpi-palette-color-2: #700618;
+  --glpi-palette-color-3: #bf0805;
+  --glpi-palette-color-4: #f2ef9f;
+  --glpi-illustrations-gradient-1: hsl(200deg, 88%, 92%);
+  --glpi-illustrations-gradient-2: hsl(200deg, 83%, 70%);
+  --glpi-illustrations-gradient-3: hsl(200deg, 88%, 40%);
+}

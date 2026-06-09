@@ -1,0 +1,1 @@
+.page .glpi-logo { width: 120px !important; height: 100px !important; background-size: contain !important; background-repeat: no-repeat !important; background-position: center !important; background-image: url("/plugins/trademark/front/picture.send.php?path=d5/6a10bff9910d5.png") !important;}

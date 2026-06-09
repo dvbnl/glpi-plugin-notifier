@@ -182,46 +182,14 @@
         try { return localStorage.getItem(LS_COLLAPSED_KEY) === '1'; } catch (e) { return false; }
     }
 
-    function findHeaderTarget() {
-        // GLPI 11 (Tabler) — inject into the main navbar header-container
-        // before the user menu so the bell sits in the navbar, not inside
-        // the user-menu dropdown area.
-        var selectors = [
-            'div.header-container.container-fluid.flex-xl-nowrap.pe-xl-0',
-            'header.navbar .container-fluid',
-            'div.navbar-nav.flex-row.order-md-last.user-menu',
-            'div.btn-group > div.navbar-nav.user-menu',
-            'header.navbar .navbar-nav.ms-auto',
-            'header.navbar .navbar-nav:last-child',
-            '.navbar .navbar-nav:last-of-type',
-            'header .navbar-nav:last-of-type'
-        ];
-        for (var i = 0; i < selectors.length; i++) {
-            var el = document.querySelector(selectors[i]);
-            if (el) return el;
-        }
-        return null;
-    }
-
     function installBell() {
         if (document.querySelector('.notifier-bell-wrap')) return true;
+        // Floating mount: GLPI's header DOM varies by version/theme and
+        // every selector-based mount we tried had edge cases. Fixed
+        // bottom-right is theme-independent and always visible.
         var bell = buildBell();
-        // Header mount: inject into GLPI's main navbar header-container,
-        // positioning the bell before the user menu for a native navbar look.
-        // Falls back to floating bottom-right when no header container is found.
-        var target = findHeaderTarget();
-        if (target) {
-            bell.classList.add('notifier-bell-header');
-            var userMenuWrapper = target.querySelector('.ms-md-4.d-none.d-lg-block');
-            if (userMenuWrapper && userMenuWrapper.parentNode === target) {
-                target.insertBefore(bell, userMenuWrapper);
-            } else {
-                target.appendChild(bell);
-            }
-        } else {
-            bell.classList.add('notifier-bell-floating');
-            document.body.appendChild(bell);
-        }
+        bell.classList.add('notifier-bell-floating');
+        document.body.appendChild(bell);
         wireEvents(bell);
         return true;
     }
