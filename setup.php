@@ -78,14 +78,7 @@ function plugin_init_notifier(): void
         $PLUGIN_HOOKS['add_javascript']['notifier'] = 'js/notifier.js';
     }
 
-    // Self-service has its own flow; central interface only.
-    if (
-        isset($_SESSION['glpiactiveprofile']['interface'])
-        && $_SESSION['glpiactiveprofile']['interface'] === 'helpdesk'
-    ) {
-        unset($PLUGIN_HOOKS['add_css']['notifier']);
-        unset($PLUGIN_HOOKS['add_javascript']['notifier']);
-    }
+    // Available in both central and helpdesk (self-service) interfaces.
 
     Plugin::registerClass(
         'GlpiPlugin\Notifier\Notification',
