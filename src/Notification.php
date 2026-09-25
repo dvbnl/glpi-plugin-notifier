@@ -52,6 +52,18 @@ class Notification extends CommonDBTM
         'Problem' => 'problem',
     ];
 
+    /** Right whose READALL bit lets a user open any item of the type in an entity. */
+    private const READALL_RIGHTS = [
+        'Ticket'      => 'ticket',
+        'Change'      => 'change',
+        'Problem'     => 'problem',
+        'ProjectTask' => 'project',
+    ];
+
+    /** Core's READALL / SEEPRIVATE bits, inlined for the hook context. */
+    private const READALL    = 1024;
+    private const SEEPRIVATE = 1024;
+
     private const DEDUP_WINDOW_SECONDS = 60;
 
     // Leftovers are picked up on the next run.
@@ -156,6 +168,7 @@ class Notification extends CommonDBTM
             $columns .= "`{$col}` TINYINT NOT NULL DEFAULT " . (int)$default . ",\n            ";
         }
 
+        // Raw DDL: interpolate only hardcoded identifiers, never input.
         $query = "CREATE TABLE IF NOT EXISTS `glpi_plugin_notifier_preferences` (
             `users_id` INT UNSIGNED NOT NULL,
             {$columns}`date_mod` TIMESTAMP NULL DEFAULT NULL,
@@ -374,7 +387,7 @@ class Notification extends CommonDBTM
 
         $mentioned = [];
         if ($isCreate || in_array('content', $relevant, true)) {
-            $mentioned = self::dispatchMentions($item, $base);
+            $mentioned = self::dispatchMentions($item, $base, $targets);
             $targets   = array_diff_key($targets, $mentioned);
         }
 
@@ -440,7 +453,7 @@ class Notification extends CommonDBTM
 
         $mentioned = [];
         if ($isCreate || in_array('content', $item->updates ?? [], true)) {
-            $mentioned = self::dispatchMentions($item, $base);
+            $mentioned = self::dispatchMentions($item, $base, $targets);
             $targets   = array_diff_key($targets, $mentioned);
         }
 
@@ -477,11 +490,16 @@ class Notification extends CommonDBTM
 
         $base = self::baseFor($parent, $parent::getType(), (int)$parent->fields['id']);
 
-        $mentioned = self::dispatchMentions($item, $base);
-
         $targets = self::collectActorsForItil($parent);
         unset($targets[(int)Session::getLoginUserID()]);
-        $targets = array_diff_key($targets, $mentioned);
+
+        $private = self::privateAudience($item, (int)$base['entities_id']);
+        if ($private !== null) {
+            $targets = array_intersect_key($targets, $private);
+        }
+
+        $mentioned = self::dispatchMentions($item, $base, $targets, $private);
+        $targets   = array_diff_key($targets, $mentioned);
 
         if (empty($targets)) {
             return;
@@ -518,8 +536,6 @@ class Notification extends CommonDBTM
 
         $base = self::baseFor($parent, $parentType, $parentId);
 
-        $mentioned = self::dispatchMentions($item, $base);
-
         $targets = self::collectActorsForItil($parent);
 
         // 'direct' so a group-only opt-out cannot silence the named tech.
@@ -528,7 +544,14 @@ class Notification extends CommonDBTM
         }
 
         unset($targets[(int)Session::getLoginUserID()]);
-        $targets = array_diff_key($targets, $mentioned);
+
+        $private = self::privateAudience($item, (int)$base['entities_id']);
+        if ($private !== null) {
+            $targets = array_intersect_key($targets, $private);
+        }
+
+        $mentioned = self::dispatchMentions($item, $base, $targets, $private);
+        $targets   = array_diff_key($targets, $mentioned);
 
         if (empty($targets)) {
             return;
@@ -549,11 +572,11 @@ class Notification extends CommonDBTM
 
         $base = self::baseFor($parent, $parent::getType(), (int)$parent->fields['id']);
 
-        $mentioned = self::dispatchMentions($item, $base);
-
         $targets = self::collectActorsForItil($parent);
         unset($targets[(int)Session::getLoginUserID()]);
-        $targets = array_diff_key($targets, $mentioned);
+
+        $mentioned = self::dispatchMentions($item, $base, $targets);
+        $targets   = array_diff_key($targets, $mentioned);
 
         if (empty($targets)) {
             return;
@@ -784,9 +807,15 @@ class Notification extends CommonDBTM
      * Returns the mentioned users so the caller can subtract them from the
      * generic recipients — being named beats being an actor.
      *
+     * A mention only reaches someone who could already open the item: an
+     * actor, or a READALL holder in its entity. Otherwise any author could
+     * leak a title to any user by typing their login.
+     *
+     * @param  array<int, string>    $actors
+     * @param  array<int, int>|null  $private audience of a private source, null when public
      * @return array<int, string>
      */
-    private static function dispatchMentions(CommonDBTM $source, array $base): array
+    private static function dispatchMentions(CommonDBTM $source, array $base, array $actors, ?array $private = null): array
     {
         if (!Config::get('mentions_enabled')) {
             return [];
@@ -802,6 +831,20 @@ class Notification extends CommonDBTM
         foreach (Mention::extract($content) as $uid) {
             if ($uid > 0 && $uid !== $actor) {
                 $targets[$uid] = 'direct';
+            }
+        }
+
+        if (empty($targets)) {
+            return [];
+        }
+
+        $readAll = isset(self::READALL_RIGHTS[$base['itemtype']])
+            ? self::usersWithRightInEntity(self::READALL_RIGHTS[$base['itemtype']], self::READALL, (int)$base['entities_id'])
+            : [];
+        foreach (array_keys($targets) as $uid) {
+            $visible = isset($actors[$uid]) || isset($readAll[$uid]);
+            if (!$visible || ($private !== null && !isset($private[$uid]))) {
+                unset($targets[$uid]);
             }
         }
 
@@ -886,18 +929,7 @@ class Notification extends CommonDBTM
             return [];
         }
 
-        $ancestors = array_values(array_map('intval', getAncestorsOf('glpi_entities', $entities_id)));
-
-        $scope = ['glpi_profiles_users.entities_id' => $entities_id];
-        if (!empty($ancestors)) {
-            $scope = ['OR' => [
-                $scope,
-                [
-                    'glpi_profiles_users.entities_id'  => $ancestors,
-                    'glpi_profiles_users.is_recursive' => 1,
-                ],
-            ]];
-        }
+        $scope = self::profileEntityScope($entities_id);
 
         $rs = $DB->request([
             'SELECT'     => ['glpi_profiles_users.users_id'],
@@ -927,6 +959,86 @@ class Notification extends CommonDBTM
                 $users[$uid] = self::CHANNEL_ENTITY;
             }
         }
+        return $users;
+    }
+
+    /** Profile assignments that reach the entity, directly or through a recursive ancestor. */
+    private static function profileEntityScope(int $entities_id): array
+    {
+        $ancestors = array_values(array_map('intval', getAncestorsOf('glpi_entities', $entities_id)));
+
+        $scope = ['glpi_profiles_users.entities_id' => $entities_id];
+        if (!empty($ancestors)) {
+            $scope = ['OR' => [
+                $scope,
+                [
+                    'glpi_profiles_users.entities_id'  => $ancestors,
+                    'glpi_profiles_users.is_recursive' => 1,
+                ],
+            ]];
+        }
+        return $scope;
+    }
+
+    /** @return array<int, int> active users holding $bit on $right in the entity */
+    private static function usersWithRightInEntity(string $right, int $bit, int $entities_id): array
+    {
+        global $DB;
+
+        $rs = $DB->request([
+            'SELECT'     => ['glpi_profiles_users.users_id'],
+            'DISTINCT'   => true,
+            'FROM'       => 'glpi_profiles_users',
+            'INNER JOIN' => [
+                'glpi_profilerights' => ['ON' => [
+                    'glpi_profilerights'  => 'profiles_id',
+                    'glpi_profiles_users' => 'profiles_id',
+                ]],
+            ],
+            'WHERE'      => [
+                'glpi_profilerights.name' => $right,
+                new QueryExpression('(`glpi_profilerights`.`rights` & ' . $bit . ') = ' . $bit),
+            ] + self::profileEntityScope($entities_id),
+        ]);
+
+        $users = [];
+        foreach ($rs as $row) {
+            $uid = (int)$row['users_id'];
+            if ($uid > 0) {
+                $users[$uid] = $uid;
+            }
+        }
+        return $users;
+    }
+
+    /**
+     * Who may see a private followup/task, mirroring core: SEEPRIVATE holders
+     * plus, for tasks, the assigned tech and tech group.
+     *
+     * @return array<int, int>|null null when the source is not private
+     */
+    private static function privateAudience(CommonDBTM $source, int $entities_id): ?array
+    {
+        if (empty($source->fields['is_private'])) {
+            return null;
+        }
+
+        $class = get_class($source);
+        $right = property_exists($class, 'rightname') ? (string)$class::$rightname : '';
+        $bit   = defined($class . '::SEEPRIVATE') ? (int)constant($class . '::SEEPRIVATE') : self::SEEPRIVATE;
+
+        $users = $right !== '' ? self::usersWithRightInEntity($right, $bit, $entities_id) : [];
+
+        if (!empty($source->fields['users_id_tech'])) {
+            $uid = (int)$source->fields['users_id_tech'];
+            $users[$uid] = $uid;
+        }
+        if (!empty($source->fields['groups_id_tech'])) {
+            foreach (self::membersOfGroups([(int)$source->fields['groups_id_tech']]) as $uid) {
+                $users[$uid] = $uid;
+            }
+        }
+
         return $users;
     }
 
@@ -1055,6 +1167,7 @@ class Notification extends CommonDBTM
             if ($DB->fieldExists(self::getTable(), $column)) {
                 continue;
             }
+            // Raw DDL: interpolate only hardcoded identifiers, never input.
             $DB->doQuery(
                 'ALTER TABLE `' . self::getTable() . '` ADD COLUMN `' . $column . '` ' . $definition
             );
@@ -1214,6 +1327,7 @@ class Notification extends CommonDBTM
             $tuples[] = '(' . implode(', ', $values) . ')';
         }
 
+        // Raw multi-row insert the builder cannot express; every value goes through quoteValue().
         $DB->doQuery(
             'INSERT INTO ' . $DB->quoteName(self::getTable())
             . ' (' . implode(', ', $quoted) . ') VALUES ' . implode(', ', $tuples)

@@ -32,7 +32,7 @@ use Glpi\Plugin\Hooks;
 use GlpiPlugin\Notifier\Config as NotifierConfig;
 use GlpiPlugin\Notifier\Notification;
 
-define('PLUGIN_NOTIFIER_VERSION', '1.0.5');
+define('PLUGIN_NOTIFIER_VERSION', '1.0.6');
 define('PLUGIN_NOTIFIER_MIN_GLPI', '10.0.0');
 define('PLUGIN_NOTIFIER_MAX_GLPI', '11.99.99');
 

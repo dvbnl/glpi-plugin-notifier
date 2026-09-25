@@ -129,8 +129,14 @@ class QuickAction
             return ['success' => false, 'error' => 'bad_status'];
         }
 
-        if ((int)($item->fields['status'] ?? 0) === $status) {
+        $current = (int)($item->fields['status'] ?? 0);
+        if ($current === $status) {
             return ['success' => true, 'message' => 'unchanged'];
+        }
+
+        // update() never consults the profile's status matrix; only the form dropdown does.
+        if (!$item::isAllowedStatus($current, $status)) {
+            return ['success' => false, 'error' => 'forbidden'];
         }
 
         $ok = $item->update([

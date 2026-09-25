@@ -201,6 +201,7 @@ function plugin_notifier_backfill_entities(): void
         if (!$DB->tableExists($table)) {
             continue;
         }
+        // Raw UPDATE ... JOIN the builder cannot express; $itemtype/$table come from the fixed map above.
         // Driven by the (itemtype, items_id) index.
         $DB->doQuery(
             'UPDATE `glpi_plugin_notifier_notifications` AS `n`'

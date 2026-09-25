@@ -50,7 +50,8 @@ switch ($action) {
 }
 
 if (empty($result['success'])) {
-    Endpoint::fail((string)($result['error'] ?? 'update_failed'), 400);
+    $error = (string)($result['error'] ?? 'update_failed');
+    Endpoint::fail($error, $error === 'forbidden' ? 403 : 400);
 }
 
 Endpoint::json($result);

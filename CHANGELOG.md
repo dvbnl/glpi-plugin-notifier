@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.6] - 2026-09-25
+
+### Security
+- **@-mentions respect item visibility**: a mention now only notifies someone who could already open the item — an actor (directly or through a group) or a user holding the type's "see all" right in the item's entity. Previously anyone who could write a comment could send any active user the title and link of that item by typing their login
+- **Quick status change honours the profile's status matrix**: the bell refuses a transition the administrator has forbidden for the profile, just like the status dropdown on the form. Previously only the generic update right was checked
+- **Private followups and tasks stay private**: a private followup or task no longer notifies requesters or observers. Only users who may see private items (the "see private" right, or for tasks the assigned technician and technician group) are notified, and mentions in private content follow the same rule
+
+### Changed
+- Remaining raw SQL (schema self-healing, the multi-row insert and the entity backfill) is now explicitly marked as such, so a future edit does not mistake it for a query-builder call
+
 ## [1.0.5] - 2026-09-15
 
 ### Added

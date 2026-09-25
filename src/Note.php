@@ -41,6 +41,7 @@ class Note
         $charset   = \DBConnection::getDefaultCharset();
         $collation = \DBConnection::getDefaultCollation();
 
+        // Raw DDL: interpolate only hardcoded identifiers, never input.
         $ok = (bool)$DB->doQuery(
             'CREATE TABLE IF NOT EXISTS `' . self::getTable() . '` (
                 `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
